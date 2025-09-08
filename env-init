@@ -1,0 +1,117 @@
+#!/bin/bash
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+readonly SCRIPT_DIR
+
+readonly TEST_ARTIFACTS_DIR="${TEST_ARTIFACTS_DIR:-${SCRIPT_DIR}/work/artifacts}"
+readonly GENERATED_LG_CONFIG="/artifacts/lg-env-config.yml"
+
+readonly KAS_CMD="${SCRIPT_DIR}/tools/build/kas-container.4.5"
+export KAS_WORK_DIR="${SCRIPT_DIR}/work"
+readonly KAS_CONF_BASE="${SCRIPT_DIR}/conf"
+
+readonly HW_MACHINE="N/A"
+readonly VIRT_MACHINE="virt-aarch64"
+
+# Defaults
+# ----
+TARGET_MACHINE="${TARGET_MACHINE:-${VIRT_MACHINE}}"
+BUILD_TYPE="debug"
+TEST_DOCKER_IMAGE="emulated-linux-testing"
+# ----
+
+# Setup
+# ----
+function testenv_setup() {
+    local -r flag="$1"
+    if [[ "${flag}" == "-f" ]] || ! docker inspect "${TEST_DOCKER_IMAGE}" &>/dev/null; then
+        DOCKER_BUILDKIT=1 docker build -t "${TEST_DOCKER_IMAGE}" "${SCRIPT_DIR}/tools/test"
+    fi
+}
+
+function set_machine() {
+    export TARGET_MACHINE="$1"
+}
+
+function get_build_conf() {
+    echo "${KAS_CONF_BASE}/${TARGET_MACHINE}.yml:${KAS_CONF_BASE}/includes/${BUILD_TYPE}.yml"
+}
+
+alias buildenv-setup='${KAS_CMD} checkout $(get_build_conf)'
+alias testenv-rebuild='testenv_setup -f'
+alias set-machine='set_machine'
+# ----
+
+# Build
+# ----
+alias build-dump='${KAS_CMD} dump $(get_build_conf)'
+alias build-shell='${KAS_CMD} shell $(get_build_conf)'
+alias build-image='${KAS_CMD} build $(get_build_conf)'
+alias build-runqemu='${KAS_CMD} shell $(get_build_conf) -c "runqemu secure-image-minimal wic.qcow2 serial nographic slirp qemuparams=\" -snapshot\""'
+
+function publish_test_artifacts() {
+    mkdir -p "${TEST_ARTIFACTS_DIR}"
+
+    for machine in ${VIRT_MACHINE} ${HW_MACHINE}; do
+        local src_path="${SCRIPT_DIR}/work/build/tmp/deploy/images/${machine}"
+        cp "${src_path}/flash-${VIRT_MACHINE}.bin" "${TEST_ARTIFACTS_DIR}/flash.bin" &>/dev/null || true
+        cp "${src_path}/secure-image-minimal-${VIRT_MACHINE}.wic.qcow2" "${TEST_ARTIFACTS_DIR}/system-image.wic.qcow2" &>/dev/null || true
+        cp "${src_path}/secure-update-bundle-${machine}.raucb" "${TEST_ARTIFACTS_DIR}/secure-update-bundle-${machine}.raucb" &>/dev/null || true
+        cp "${src_path}/lg-env-config.yml" "${TEST_ARTIFACTS_DIR}/lg-env-config.yml" &>/dev/null || true         
+    done
+}
+
+alias build-publish='publish_test_artifacts'
+# ----
+
+# Test
+# ----
+function run_in_testenv() {
+    # Make sure the test environment is available
+    testenv_setup
+
+    local extra_opts=""
+    if [[ "$1" == "-i" ]]; then
+        extra_opts+="-i "
+        shift
+    fi
+    # For some unknown reason, pytest is not able to locate the pytest.ini
+    # without explicitly specifying it in non-interactive runs.
+    PYTEST_OPTIONS="-c /test/pytest.ini --lg-env ${GENERATED_LG_CONFIG}"
+    # Spawn an ephemeral test container and pass command parameters to it
+    docker run --rm -t \
+        -v "${SCRIPT_DIR}/test"/:/test/ \
+        -v "${TEST_ARTIFACTS_DIR}"/:/artifacts:ro \
+        -w /test ${extra_opts} \
+        -e PYTEST_ADDOPTS="${PYTEST_OPTIONS}" \
+        ${TEST_DOCKER_IMAGE} "$@"
+}
+
+alias test-shell='run_in_testenv -i /bin/bash'
+alias test-run-pytest='run_in_testenv /usr/local/bin/pytest'
+# ----
+
+# Pipeline helpers
+# ----
+function run_marked_tests() {
+    local -r marker_expression="$1"
+    shift
+
+    #local skip_hardware="n"
+    #if [[ "$1" == "no-hardware" ]]; then
+    #    skip_hardware="y"
+    #    shift
+    #fi
+
+    echo "=== Running ${marker_expression} on emulation ==="
+    set-machine "${VIRT_MACHINE}"
+    test-run-pytest -n auto -m "(${marker_expression}) and not hardware_only" $@
+
+    #if [[ "${skip_hardware}" == "n" ]]; then
+    #    echo "=== Running ${marker_expression} on hardware ===" 
+    #    set-machine "${HW_MACHINE}"
+    #    test-run-pytest -m "(${marker_expression}) and not emulation_only" $@
+    #fi
+}
+
+alias run-pre-merge-tests='run_marked_tests "smoketest"'
+alias run-nightly-tests='run_marked_tests "smoketest or nightly"'

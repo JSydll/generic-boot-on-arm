@@ -1,0 +1,54 @@
+header:
+  version: 14
+  includes:
+    - conf/includes/base.yml
+    - conf/includes/sstate-mirror.yml
+
+machine: virt-aarch64
+
+target:
+  - secure-image-minimal
+  - secure-update-bundle
+
+repos:
+  meta-openembedded:
+    url: https://github.com/openembedded/meta-openembedded
+    path: layers/meta-openembedded
+    layers:
+      meta-oe:
+      meta-perl:
+
+  meta-security:
+    url: https://git.yoctoproject.org/meta-security
+    path: layers/meta-security
+    
+  meta-secure-core:
+    url: https://github.com/Wind-River/meta-secure-core.git
+    path: layers/meta-secure-core
+    layers:
+      meta-secure-core-common:
+      meta-signing-key:
+      meta-efi-secure-boot:
+
+  # Using fork of meta-arm until build issues in master are fixed
+  meta-arm-contrib:
+    url: "https://github.com/JSydll/meta-arm-contrib"
+    branch: master-next
+    path: layers/meta-arm
+    layers:
+      meta-arm:
+      meta-arm-toolchain:
+
+local_conf_header:
+  secure-boot: |
+    # For now, keys are created in the build directory - a productive setup would require
+    # proper key provisioning and infrastructure.
+    SBSIGN_KEYS_DIR = "${TOPDIR}/secrets"
+
+    DISTRO_FEATURES:append = " security "
+    IMAGE_CLASSES += "dm-verity-img"
+    DM_VERITY_IMAGE = "secure-image-minimal"
+    DM_VERITY_IMAGE_TYPE = "squashfs"
+
+  versioning: |
+    SOFTWARE_VERSION = "1.0"

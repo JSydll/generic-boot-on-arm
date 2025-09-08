@@ -1,0 +1,8 @@
+header:
+  version: 14
+
+local_conf_header:
+  debugging: |
+    # Enable easy debugging
+    EXTRA_IMAGE_FEATURES += "allow-empty-password allow-root-login empty-root-password"
+    EXTRA_IMAGE_FEATURES += "ssh-server-openssh"

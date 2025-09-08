@@ -1,0 +1,1 @@
+The `setup_strategy.py` is essentially a copy from labgrid's [example directory](https://github.com/labgrid-project/labgrid/tree/master/examples/qemu-networking).

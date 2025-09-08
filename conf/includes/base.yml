@@ -1,0 +1,38 @@
+header:
+  version: 14
+
+target:
+  - secure-image-minimal
+  - secure-update-bundle
+
+distro: poky
+
+defaults:
+  repos:
+    branch: walnascar
+
+repos:
+  poky:
+    url: "https://git.yoctoproject.org/git/poky"
+    path: layers/poky
+    layers:
+      meta:
+      meta-poky:
+      meta-yocto-bsp:
+
+  meta-rauc:
+    url: "https://github.com/rauc/meta-rauc.git"
+    branch: master
+    path: layers/meta-rauc
+
+  meta-generic-boot:
+    layers:
+      meta-generic-boot:
+
+local_conf_header:
+  distro: |
+    DISTRO_FEATURES:append = " rauc"
+    INIT_MANAGER = "systemd"
+
+  versioning: |
+    SOFTWARE_VERSION ??= "0.0"
