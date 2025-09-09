@@ -24,6 +24,7 @@ LG_ARTIFACT_MOUNTPOINT = "/artifacts"
 
 # Artifact nomenclature
 FIRMWARE_ARTIFACT = "flash.bin"
+ESP_IMAGE_ARTIFACT = "esp-image.wic.qcow2"
 SYSTEM_IMAGE_ARTIFACT = "system-image.wic.qcow2"
 UPDATE_BUNDLE_ARTIFACT = "secure-update-bundle-${MACHINE}.raucb"
 
@@ -40,13 +41,13 @@ do_deploy() {
 do_deploy:append:virt-aarch64() {
     sed -e "s|@@LG_ARTIFACT_MOUNTPOINT@@|${LG_ARTIFACT_MOUNTPOINT}|" \
         -e "s|@@FIRMWARE_ARTIFACT@@|${FIRMWARE_ARTIFACT}|" \
+        -e "s|@@ESP_IMAGE_ARTIFACT@@|${ESP_IMAGE_ARTIFACT}|" \
         -e "s|@@SYSTEM_IMAGE_ARTIFACT@@|${SYSTEM_IMAGE_ARTIFACT}|" \
         -e "s|@@UPDATE_BUNDLE_ARTIFACT@@|${UPDATE_BUNDLE_ARTIFACT}|" \
         -e "s|@@MACHINE@@|${MACHINE}|" \
         -e "s|@@QB_CPU_VALUE@@|${QB_CPU_VALUE}|" \
         -e "s|@@QB_MEM_VALUE@@|${QB_MEM_VALUE}|" \
         -e "s|@@QB_SMP@@|${QB_SMP}|" \
-        -e "s|@@QB_EXTRA_OPTS@@|${QB_EXTRA_OPTS}|" \
         -i ${DEPLOYDIR}/${LG_CONFIG_FILE}
 }
 

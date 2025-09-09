@@ -2,7 +2,8 @@ header:
   version: 14
   includes:
     - conf/includes/base.yml
-    - conf/includes/sstate-mirror.yml
+    # The mirror from Yocto's autobuilder does not seem to have many matches, unfortunately.
+    #- conf/includes/sstate-mirror.yml
 
 machine: virt-aarch64
 

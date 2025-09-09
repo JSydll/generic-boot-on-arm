@@ -20,8 +20,6 @@ _UPDATE_INSTALLATION_TIMEOUT = 300
 @attr.s(eq=False)
 class UpdateBundles(Resource):
     latest: str = attr.ib()
-    lts: str = attr.ib()
-    manufacturing: str = attr.ib()
 
 
 @dataclass
