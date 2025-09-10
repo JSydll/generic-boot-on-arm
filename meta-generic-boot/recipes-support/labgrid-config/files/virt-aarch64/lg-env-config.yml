@@ -1,6 +1,3 @@
-features:
-- os-canbus
-
 targets:
   main:
     resources: &common-resources
@@ -15,16 +12,16 @@ targets:
       - QEMUDriver:
           qemu_bin: qemu_aarch64
           machine: virt,secure=on
-          cpu: @@QB_CPU_VALUE@@
-          memory: @@QB_MEM_VALUE@@
+          cpu: cortex-a72
+          memory: 4G
           nic: user,model=virtio-net-pci
           bios: flash_bin
           disk: rootfs
           extra_args: " @@QB_SMP@@ -drive id=disk1,file=@@LG_ARTIFACT_MOUNTPOINT@@/@@ESP_IMAGE_ARTIFACT@@,if=none,format=qcow2 -device virtio-blk-device,drive=disk1 -snapshot"
       - ShellDriver: &shell-config
-          login_prompt: "@@MACHINE@@ login: "
+          login_prompt: "virt-aarch64 login: "
           username: "root"
-          prompt: 'root@@@MACHINE@@+:[^ ]+ '
+          prompt: 'root@virt-aarch64+:[^ ]+ '
           login_timeout: 200
       - SSHDriver: {}
       - QEMUSetupStrategy: {}
