@@ -14,6 +14,8 @@ IMAGE_BUILDINFO_VARS:append = " SOFTWARE_VERSION"
 DEPENDS:append = "labgrid-env-config"
 
 # Image features
+# Note that the rootfs is read-only, so all mountpoints must be created during build time.
+OVERLAYFS_ETC_CREATE_MOUNT_DIRS = "0"
 OVERLAYFS_ETC_MOUNT_POINT = "/data"
 OVERLAYFS_ETC_FSTYPE = "ext4"
 OVERLAYFS_ETC_DEVICE:virt-aarch64 = "/dev/vdb5"

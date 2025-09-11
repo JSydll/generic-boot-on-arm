@@ -31,7 +31,7 @@ repos:
 
 local_conf_header:
   distro: |
-    DISTRO_FEATURES:append = " rauc"
+    DISTRO_FEATURES:append = " rauc systemd overlayfs"
     INIT_MANAGER = "systemd"
 
   versioning: |
