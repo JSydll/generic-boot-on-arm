@@ -14,7 +14,9 @@ from labgrid.resource import Resource
 import environment.software_version as versions
 
 
-_UPDATE_INSTALLATION_TIMEOUT = 300
+_UPDATE_INSTALLATION_TIMEOUT: int = 300
+_UPDATE_SLOT_A: str = 'system0'
+_UPDATE_SLOT_B: str = 'system1'
 
 @target_factory.reg_resource
 @attr.s(eq=False)
@@ -75,13 +77,8 @@ class UpdateFlow:
         """
         bundles = self.target.get_resource(UpdateBundles)
 
-        if version == versions.SoftwareVersion.lts:
-            src_path = bundles.lts
-        elif version == versions.SoftwareVersion.latest:
+        if version == versions.SoftwareVersion.latest:
             src_path = bundles.latest
-        elif version == versions.SoftwareVersion.manufacturing:
-            # Note: This is usually only used to reset targets to the manufacturing state.
-            src_path = bundles.manufacturing
         else:
             raise NotImplementedError(f"Version {version} not supported yet.")
 
@@ -133,7 +130,7 @@ class UpdateFlow:
         
         for slot, state_before in slot_states_before.items():
             if state_before.booted:
-                expected_slot = 'B' if slot == 'A' else 'A'
+                expected_slot = _UPDATE_SLOT_B if slot == _UPDATE_SLOT_A else _UPDATE_SLOT_A
                 state = self._slot_states.get(expected_slot)
                 assert state and state.good and state.booted, (
                     f"After update from slot {slot} [{self._slot_states.get(slot)}]: "
