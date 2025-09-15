@@ -1,13 +1,16 @@
 [Unit]
-Description=Sync U-Boot EFI variables before shutdown
+Description=Sync U-Boot EFI variables before shutdown -- DEVELOPMENT USE ONLY!
 DefaultDependencies=no
 After=rauc.service
-Before=shutdown.target
+Before=umount.target halt.target shutdown.target reboot.target
 
 [Service]
 Type=oneshot
-RemainAfterExit=no
+RemainAfterExit=yes
 ExecStart=/usr/bin/run-efivars-sync
+# Facilitate debugging of the shutdown-only service by logging to console as well.
+StandardOutput=journal+console
+StandardError=journal+console
 
 [Install]
-WantedBy=shutdown.target
+WantedBy=halt.target shutdown.target reboot.target
