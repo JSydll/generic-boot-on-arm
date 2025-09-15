@@ -70,7 +70,7 @@ IMAGE_BOOT_FILES = "${UKI_FILENAME}"
 do_copy_wic_partitions() {
     wic_workdir="${WORKDIR}/build-wic"
     cp -v "${wic_workdir}"/*.direct.p1 "${IMGDEPLOYDIR}"/${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}${IMAGE_NAME_SUFFIX}.uki.squashfs
-    cp -v "${wic_workdir}"/*.direct.p3 "${IMGDEPLOYDIR}"/${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}${IMAGE_NAME_SUFFIX}.rootfs.squashfs.verity
+    cp -v "${wic_workdir}"/*.direct.p3 "${IMGDEPLOYDIR}"/${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}${IMAGE_NAME_SUFFIX}.verity.squashfs
 }
 addtask copy_wic_partitions after do_image_wic before do_image_complete
 
