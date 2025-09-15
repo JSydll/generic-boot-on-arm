@@ -103,7 +103,8 @@ class UpdateFlow:
             Any exceptions raised by the shell instance.
         """
         self.target.activate(self.shell)
-        self.shell.run('rauc install /tmp/update-bundle.raucb', timeout=_UPDATE_INSTALLATION_TIMEOUT)
+        _, _, exitcode = self.shell.run('rauc install /tmp/update-bundle.raucb', timeout=_UPDATE_INSTALLATION_TIMEOUT)
+        assert exitcode == 0, f"Update installation failed (error {exitcode})!"
 
     def activate_update(self) -> None:
         """
