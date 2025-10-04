@@ -17,7 +17,7 @@ targets:
           nic: user,model=virtio-net-pci
           bios: flash_bin
           disk: rootfs
-          extra_args: " @@QB_SMP@@ -drive id=disk1,file=@@LG_ARTIFACT_MOUNTPOINT@@/@@ESP_IMAGE_ARTIFACT@@,if=none,format=qcow2 -device virtio-blk-device,drive=disk1 -snapshot"
+          extra_args: " @@QB_SMP@@ -snapshot"
       - ShellDriver: &shell-config
           login_prompt: "virt-aarch64 login: "
           username: "root"

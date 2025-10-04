@@ -54,7 +54,6 @@ function publish_test_artifacts() {
     for machine in ${VIRT_MACHINE} ${HW_MACHINE}; do
         local src_path="${SCRIPT_DIR}/work/build/tmp/deploy/images/${machine}"
         cp "${src_path}/flash.bin" "${TEST_ARTIFACTS_DIR}/flash.bin" &>/dev/null || true
-        cp "${src_path}/efi-system-partition-image-${VIRT_MACHINE}.rootfs.wic.qcow2" "${TEST_ARTIFACTS_DIR}/esp-image.wic.qcow2" &>/dev/null || true
         cp "${src_path}/secure-image-minimal-${VIRT_MACHINE}.rootfs.wic.qcow2" "${TEST_ARTIFACTS_DIR}/system-image.wic.qcow2" &>/dev/null || true
         cp "${src_path}/secure-update-bundle-${machine}.raucb" "${TEST_ARTIFACTS_DIR}/secure-update-bundle-${machine}.raucb" &>/dev/null || true
         cp "${src_path}/lg-env-config.yml" "${TEST_ARTIFACTS_DIR}/lg-env-config.yml" &>/dev/null || true         

@@ -18,7 +18,7 @@ DEPENDS:append = "labgrid-env-config"
 OVERLAYFS_ETC_CREATE_MOUNT_DIRS = "0"
 OVERLAYFS_ETC_MOUNT_POINT = "/data"
 OVERLAYFS_ETC_FSTYPE = "ext4"
-OVERLAYFS_ETC_DEVICE:virt-aarch64 = "/dev/vdb5"
+OVERLAYFS_ETC_DEVICE:virt-aarch64 = "/dev/vda6"
 
 IMAGE_FEATURES:append = " \
     read-only-rootfs \
@@ -69,8 +69,8 @@ IMAGE_BOOT_FILES = "${UKI_FILENAME}"
 # Allow reuse of the partition images already created by wic
 do_copy_wic_partitions() {
     wic_workdir="${WORKDIR}/build-wic"
-    cp -v "${wic_workdir}"/*.direct.p1 "${IMGDEPLOYDIR}"/${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}${IMAGE_NAME_SUFFIX}.uki.squashfs
-    cp -v "${wic_workdir}"/*.direct.p3 "${IMGDEPLOYDIR}"/${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}${IMAGE_NAME_SUFFIX}.verity.squashfs
+    cp -v "${wic_workdir}"/*.direct.p2 "${IMGDEPLOYDIR}"/${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}${IMAGE_NAME_SUFFIX}.uki.squashfs
+    cp -v "${wic_workdir}"/*.direct.p4 "${IMGDEPLOYDIR}"/${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}${IMAGE_NAME_SUFFIX}.verity.squashfs
 }
 addtask copy_wic_partitions after do_image_wic before do_image_complete
 
@@ -82,10 +82,8 @@ do_image_wic[depends] += " \
 # While not directly depending on it, running the emulation requires the ESP
 do_image_complete[depends] += " \
     trusted-firmware-a:do_deploy \
-    efi-system-partition-image:do_image_complete \
 "
 
 do_clean[depends] += " \
-    trusted-firmware-a:do_clean \
-    efi-system-partition-image:do_clean \    
+    trusted-firmware-a:do_clean \  
 "
