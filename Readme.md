@@ -14,7 +14,7 @@ Currently, only an integration for `qemuarm64` is available. A port on a represe
 - cross-validation from widespread use in the server & desktop world
 - rather sophisticated specification
 - reduce development & maintenance effort
-- cover some gaps, like missing (default) signature for FIT config itself (see u-boot link)
+- cover some gaps, like missing (default) signature for FIT config itself (see [u-boot docs](https://docs.u-boot.org/en/latest/usage/fit/signature.html#signed-configurations))
 
 Also pushed by:
 - Embedded Base Boot Requirements [EBBR](https://arm-software.github.io/ebbr/)
@@ -44,8 +44,25 @@ Also pushed by:
 
 ### Considerations
 
-**Reasons against using u-boot as switching bootloader**
-_(according to Siemens)_
+**General preconditions for UEFI on ARM**
+
+- ARM TrustZone for extended firmware support
+- eFuses and/or eMMC with Replay Protected Memory Blocks (RPMB) for storing the keyring
+
+**Splitting OS and bootloader updates**
+
+Established approaches on embedded Linux devices often use a common path for both updating the Linux side 
+of the system as well as the bootloader (see RAUC's capabilities on doing that, for example).
+In contrast to this, the TF-A architecture and UEFI specification separate the two by defining
+[capsule updates](https://docs.u-boot.org/en/latest/develop/uefi/uefi.html#enabling-uefi-capsule-update-feature)
+for updating the firmware (at least the extended firmware scope or _FIP_ [Firmware Interface Package]).
+This would then also include the bootloader.
+An advantage of this is, again, that implementations must follow a clear specification, while some aspects like
+the requirement for a FAT-based EFI System Partition are potential downsides - especially in the embedded context.
+
+**Alternatives to using u-boot as switching bootloader**
+
+_Reasoning according to Siemens:_
 
 - Low trust in its (UEFI-related) implementation
 - Missing support for (secure) storage of the switching flag (i.e. `BootOrder` and `BootNext`)
@@ -111,6 +128,11 @@ U-Boot has support for serving the hardware watchdog until ExitBootServices() (a
 - Many of the involved open source projects lack beginner documentation
 - Implementations by Linaro and Siemens have a lot more features than the presented approach (which makes it hard to understand at times)
 - Lots of building blocks already in upstream layers - though quality & maintenance needs to be monitored
+
+## Recent advances in alternative approaches
+
+- Barebox will (soon) support direct FIT image verification - further reducing the attack surface for altered content in the OS images
+  (see [this talk by A. Fatoum](https://www.youtube.com/watch?v=dermEhoAu1I))
 
 ## Further readings
 
