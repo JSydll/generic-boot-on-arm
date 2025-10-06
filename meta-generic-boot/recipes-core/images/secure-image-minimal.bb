@@ -11,14 +11,17 @@ inherit image-buildinfo
 IMAGE_BUILDINFO_VARS:append = " SOFTWARE_VERSION"
 
 # Testing support
-DEPENDS:append = "labgrid-env-config"
+DEPENDS:append = " labgrid-env-config "
+
+# Emulation support
+DEPENDS:append:virt-aarch64 = " qemu-system-native "
 
 # Image features
 # Note that the rootfs is read-only, so all mountpoints must be created during build time.
 OVERLAYFS_ETC_CREATE_MOUNT_DIRS = "0"
 OVERLAYFS_ETC_MOUNT_POINT = "/data"
 OVERLAYFS_ETC_FSTYPE = "ext4"
-OVERLAYFS_ETC_DEVICE:virt-aarch64 = "/dev/vda6"
+OVERLAYFS_ETC_DEVICE:virt-aarch64 = "/dev/mmcblk0p6"
 
 IMAGE_FEATURES:append = " \
     read-only-rootfs \
@@ -73,6 +76,14 @@ do_copy_wic_partitions() {
     cp -v "${wic_workdir}"/*.direct.p4 "${IMGDEPLOYDIR}"/${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}${IMAGE_NAME_SUFFIX}.verity.squashfs
 }
 addtask copy_wic_partitions after do_image_wic before do_image_complete
+
+# For emulation, the virtual image size has to exactly fit the specified eMMC size
+do_resize_qcow2_image() {
+    if [ -f "${IMGDEPLOYDIR}/${IMAGE_NAME}.wic.qcow2" ]; then
+        qemu-img resize "${IMGDEPLOYDIR}/${IMAGE_NAME}.wic.qcow2" "${QB_MMC_SIZE}"
+    fi
+}
+addtask resize_qcow2_image after do_image_wic before do_image_complete
 
 # Dependencies for image creation and deployment of all relevant artifacts
 do_image_wic[depends] += " \

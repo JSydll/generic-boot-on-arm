@@ -16,8 +16,12 @@ targets:
           memory: 4G
           nic: user,model=virtio-net-pci
           bios: flash_bin
-          disk: rootfs
-          extra_args: " @@QB_SMP@@ -snapshot"
+          extra_args: >-
+            -drive if=none,file=@@LG_ARTIFACT_MOUNTPOINT@@/@@SYSTEM_IMAGE_ARTIFACT@@,format=qcow2,id=MMC0 
+            -device sdhci-pci,sd-spec-version=3 
+            -device sd-card,drive=MMC0 
+            -snapshot
+            @@QB_SMP@@ 
       - ShellDriver: &shell-config
           login_prompt: "virt-aarch64 login: "
           username: "root"
@@ -31,7 +35,6 @@ tools:
 
 images:
   flash_bin: "@@LG_ARTIFACT_MOUNTPOINT@@/@@FIRMWARE_ARTIFACT@@"
-  rootfs: "@@LG_ARTIFACT_MOUNTPOINT@@/@@SYSTEM_IMAGE_ARTIFACT@@"
 
 imports:
   - environment.qemu.setup_strategy

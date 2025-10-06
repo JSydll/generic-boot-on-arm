@@ -20,7 +20,7 @@ def default_shell(target: Target, strategy: Any) -> ShellDriver:
 
 
 @pytest.fixture(scope='session')
-def default_ssh(target: Target, strategy: Any) -> ShellDriver:
+def default_ssh(target: Target, strategy: Any) -> SSHDriver:
     """
     Bring the default target in the 'shell' state and provide a SSHDriver instance.
     """

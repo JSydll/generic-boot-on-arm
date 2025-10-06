@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-readonly VARS_PARTITION="/dev/vda1"
+readonly VARS_PARTITION="/dev/mmcblk0p1"
 readonly VARS_MOUNTPOINT="/mnt"
 readonly VAR_ORIG="${VARS_MOUNTPOINT}/ubootefi.var"
 readonly VAR_TMP="${VARS_MOUNTPOINT}/ubootefi.var.tmp"

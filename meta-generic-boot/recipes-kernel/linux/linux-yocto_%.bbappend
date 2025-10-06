@@ -2,6 +2,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 # UEFI / secure boot related configuration already pulled in by meta-arm.
 SRC_URI:append = " \
+    file://mmc.cfg \
     file://overlayfs.cfg \    
 "
 
