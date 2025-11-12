@@ -43,6 +43,23 @@ repos:
     url: https://git.yoctoproject.org/meta-security
     path: layers/meta-security
 
+  meta-secure-core:
+    url: https://github.com/Wind-River/meta-secure-core.git
+    path: layers/meta-secure-core
+    layers:
+      meta-secure-core-common:
+      meta-signing-key:
+      meta-efi-secure-boot:
+
+  # Using fork of meta-arm until build issues in master are fixed
+  meta-arm-contrib:
+    url: https://github.com/JSydll/meta-arm-contrib
+    branch: master-next
+    path: layers/meta-arm
+    layers:
+      meta-arm:
+      meta-arm-toolchain:
+
   meta-rauc:
     url: https://github.com/rauc/meta-rauc.git
     path: layers/meta-rauc

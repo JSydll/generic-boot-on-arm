@@ -11,25 +11,6 @@ target:
   - secure-image-minimal
   - secure-update-bundle
 
-repos:
-  meta-secure-core:
-    url: https://github.com/Wind-River/meta-secure-core.git
-    path: layers/meta-secure-core
-    branch: master
-    layers:
-      meta-secure-core-common:
-      meta-signing-key:
-      meta-efi-secure-boot:
-
-  # Using fork of meta-arm until build issues in master are fixed
-  meta-arm-contrib:
-    url: https://github.com/JSydll/meta-arm-contrib
-    branch: master-next
-    path: layers/meta-arm
-    layers:
-      meta-arm:
-      meta-arm-toolchain:
-
 local_conf_header:
   virt-aarch64-security: |
     IMAGE_CLASSES += "dm-verity-img"

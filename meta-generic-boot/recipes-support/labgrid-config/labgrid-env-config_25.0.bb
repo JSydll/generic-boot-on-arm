@@ -33,8 +33,8 @@ do_deploy() {
     bbdebug 2 "Providing labgrid environment configuration for tests..."
     install -m 0644 ${S}/lg-env-config.yml ${DEPLOYDIR}/${LG_CONFIG_FILE}
     cd ${DEPLOYDIR}
-    rm -f lg-env-config.yml
-    ln -sf ${LG_CONFIG_FILE} lg-env-config.yml
+    rm -f lg-env-config-${MACHINE}.yml
+    ln -sf ${LG_CONFIG_FILE} lg-env-config-${MACHINE}.yml
 }
 
 do_deploy:append:virt-aarch64() {
