@@ -12,17 +12,39 @@ defaults:
     branch: walnascar
 
 repos:
-  poky:
-    url: "https://git.yoctoproject.org/git/poky"
-    path: layers/poky
+  bitbake:
+    url: https://git.openembedded.org/bitbake
+    path: layers/bitbake
+    branch: "2.12"
+    layers:
+      bitbake: excluded
+
+  openembedded-core:
+    url: https://git.openembedded.org/openembedded-core
+    path: layers/oe-core
     layers:
       meta:
+
+  meta-yocto:
+    url: https://git.yoctoproject.org/meta-yocto
+    path: layers/meta-yocto
+    layers:
       meta-poky:
       meta-yocto-bsp:
 
+  meta-openembedded:
+    url: https://github.com/openembedded/meta-openembedded
+    path: layers/meta-openembedded
+    layers:
+      meta-oe:
+      meta-perl:
+
+  meta-security:
+    url: https://git.yoctoproject.org/meta-security
+    path: layers/meta-security
+
   meta-rauc:
-    url: "https://github.com/rauc/meta-rauc.git"
-    branch: master
+    url: https://github.com/rauc/meta-rauc.git
     path: layers/meta-rauc
 
   meta-generic-boot:
@@ -31,8 +53,13 @@ repos:
 
 local_conf_header:
   distro: |
-    DISTRO_FEATURES:append = " rauc systemd overlayfs"
+    DISTRO_FEATURES:append = " rauc systemd overlayfs security "
     INIT_MANAGER = "systemd"
 
   versioning: |
     SOFTWARE_VERSION ??= "0.0"
+
+  common-security:
+    # For now, keys are created in the build directory - a productive setup would require
+    # proper key provisioning and infrastructure.
+    SBSIGN_KEYS_DIR = "${TOPDIR}/secrets"
