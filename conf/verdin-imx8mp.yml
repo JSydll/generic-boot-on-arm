@@ -7,11 +7,17 @@ machine: verdin-imx8mp
 
 defaults:
   repos:
+    # This is mostly required due to the layer compatibility of Toradex' layers
+    # and the need to have at least the walnascar release (e.g. for uki.bbclass).
     branch: master
 
 repos:
   bitbake:
+    # master branches are on whinlatter so use corresponding bitbake version
     branch: "2.14"
+
+  meta-arm-contrib:
+    branch: master-next-whinlatter
   
   meta-freescale:
     url: https://github.com/Freescale/meta-freescale.git
@@ -29,26 +35,36 @@ repos:
     url: https://git.toradex.com/cgit/meta-toradex-bsp-common.git
     path: layers/meta-toradex-bsp-common
 
-  #meta-toradex-security:
-  #  url: https://github.com/toradex/meta-toradex-security.git
-  #  path: layers/meta-toradex-security
-  #  branch: scarthgap-7.x.y
+  meta-security:
+    layers:
+      .:
+      meta-tpm:
+
+  # Using fork of meta-toradex-security until whinlatter is supported
+  meta-toradex-security:
+    url: https://github.com/JSydll/meta-toradex-security-contrib.git
+    path: layers/meta-toradex-security
+    branch: scarthgap-7.x.y-next
 
 local_conf_header:
   imx-bsp: |
     ACCEPT_FSL_EULA = "1"
 
-  toradex: |
+  toradex-bsp: |
     MACHINEOVERRIDES =. "mainline:use-mainline-bsp:"
 
-    # Remove contents defined in the machine conf
+    # Remove contents defined in the machine.conf
     IMAGE_CLASSES:remove = "image_type_tezi"
     IMAGE_FSTYPES:remove = "teziimg"
     IMAGE_BOOT_FILES:remove = "boot.scr-${MACHINE};boot.scr"
-    WKS_FILE_DEPENDS:remove = "u-boot-default-script"
+    WKS_FILE_DEPENDS:remove = " u-boot-default-script"
 
   verdin-imx8mp-security: |
     MACHINE_FEATURES:append = " efi uefi-secureboot"
+
+    # Currently leave OP-TEE disabled
+    # MACHINE_FEATURES:append = " optee"
+    #TDX_OPTEE_ENABLE = "1"
 
   device-config: |
     EMMC_BLOCK_DEV = "/dev/mmcblk1"

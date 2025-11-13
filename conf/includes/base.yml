@@ -38,6 +38,7 @@ repos:
     layers:
       meta-oe:
       meta-perl:
+      meta-python:
 
   meta-security:
     url: https://git.yoctoproject.org/meta-security
