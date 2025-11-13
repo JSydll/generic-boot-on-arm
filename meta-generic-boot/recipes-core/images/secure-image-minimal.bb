@@ -1,9 +1,17 @@
-SUMMARY = "..."
-IMAGE_LINGUAS = " "
+SUMMARY = "Minimal secure boot image using signed UKIs and a dm-verity rootfs."
+DESCRIPTION = "This image provides a minimal secure boot setup using UEFI Secure Boot \
+with signed UKIs (Unified Kernel Images) and a read-only root filesystem protected by dm-verity. \
+It is designed to work with RAUC-based secure update mechanisms, allowing safe and reliable updates \
+of the system while ensuring the integrity and authenticity of the boot components and root filesystem."
 
 LICENSE = "MIT"
 
 inherit core-image uki-with-profiles sbsign
+
+# Required machine specific configuration
+IMAGE_BOARD_SPECIFIC_INC = ""
+IMAGE_BOARD_SPECIFIC_INC:virt-aarch64 = "secure-image-minimal_virt-aarch64.inc"
+IMAGE_BOARD_SPECIFIC_INC:verdin-imx8mp = "secure-image-minimal_verdin-imx8mp.inc"
 
 # Inject an indicator of change into the image
 inherit image-buildinfo
@@ -13,15 +21,11 @@ IMAGE_BUILDINFO_VARS:append = " SOFTWARE_VERSION"
 # Testing support
 DEPENDS:append = " labgrid-env-config "
 
-# Emulation support
-DEPENDS:append:virt-aarch64 = " qemu-system-native "
-
 # Image features
 # Note that the rootfs is read-only, so all mountpoints must be created during build time.
 OVERLAYFS_ETC_CREATE_MOUNT_DIRS = "0"
 OVERLAYFS_ETC_MOUNT_POINT = "/data"
 OVERLAYFS_ETC_FSTYPE = "ext4"
-OVERLAYFS_ETC_DEVICE:virt-aarch64 = "/dev/mmcblk0p6"
 
 IMAGE_FEATURES:append = " \
     read-only-rootfs \
@@ -29,30 +33,23 @@ IMAGE_FEATURES:append = " \
 "
 
 # Image contents (do not pull in the packagegroup-base-extended as done by core-image.bbclass)
+# TODO: Add OP-TEE client
 IMAGE_INSTALL = " \
     packagegroup-core-boot \
     ${CORE_IMAGE_EXTRA_INSTALL} \
     rauc \
     e2fsprogs-mke2fs \
-"
-
-# WARNING: u-boot-efivars-sync is a development-only workaround!
-IMAGE_INSTALL:append:virt-aarch64 = " \
-    efivar \
     efibootmgr \
-    u-boot-efivars-sync \
 "
 
-IMAGE_FSTYPES = "squashfs wic.qcow2"
+IMAGE_FSTYPES = "squashfs wic"
 WKS_FILE = "secure-system-image.wks.in"
 
 # dm-verity setup
 INITRAMFS_IMAGE = "dm-verity-image-initramfs"
 
-# UKI specification
-KERNEL_DEVICETREE:virt-aarch64 = "devicetree/virt-aarch64.dtb"
-do_uki[depends] += " ${@ bb.utils.contains('MACHINE', 'virt-aarch64', 'devicetree-virt-aarch64:do_deploy', '', d)} "
-# No default commandline - profiles are used instead
+# Generic UKI specification
+# # No default commandline - profiles are used instead
 UKI_CMDLINE = ""
 UKI_SB_KEY = "${SBSIGN_KEY}"
 UKI_SB_CERT = "${SBSIGN_CERT}"
@@ -77,24 +74,5 @@ do_copy_wic_partitions() {
 }
 addtask copy_wic_partitions after do_image_wic before do_image_complete
 
-# For emulation, the virtual image size has to exactly fit the specified eMMC size
-do_resize_qcow2_image() {
-    if [ -f "${IMGDEPLOYDIR}/${IMAGE_NAME}.wic.qcow2" ]; then
-        qemu-img resize "${IMGDEPLOYDIR}/${IMAGE_NAME}.wic.qcow2" "${QB_MMC_SIZE}"
-    fi
-}
-addtask resize_qcow2_image after do_image_wic before do_image_complete
-
-# Dependencies for image creation and deployment of all relevant artifacts
-do_image_wic[depends] += " \
-    u-boot:do_deploy \
-"
-
-# While not directly depending on it, running the emulation requires the ESP
-do_image_complete[depends] += " \
-    trusted-firmware-a:do_deploy \
-"
-
-do_clean[depends] += " \
-    trusted-firmware-a:do_clean \  
-"
+# Note: Allow overwriting configuration from above
+require ${IMAGE_BOARD_SPECIFIC_INC}

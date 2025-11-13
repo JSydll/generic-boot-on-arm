@@ -11,6 +11,8 @@ SRC_URI:append = " \
     file://mmc.cfg \
     file://squashfs.cfg \
     file://uefi-secureboot.cfg \
+    file://uefi-secureboot-bootslots.cfg \
+    file://uefi-secureboot-enable.cfg \
 "
 
 # UEFI-based secure boot

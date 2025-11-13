@@ -1,20 +1,20 @@
 # Heavily inspired from Linaro's Trusted Substrate implementation
 # (https://gitlab.com/Linaro/trustedsubstrate/meta-ts) and the meta-arm layer.
 
-COMPATIBLE_MACHINE:virt-aarch64 = "virt-aarch64"
+COMPATIBLE_MACHINE = "virt-aarch64"
 
 # Note:
 # Several configurations are already provided for aarch64:qemuall in meta-arm/**/trusted-firmware-a_%.bbappend
 
-TFA_PLATFORM:virt-aarch64 = "qemu"
+TFA_PLATFORM = "qemu"
 #TFA_SPD = "opteed"
-TFA_UBOOT:virt-aarch64 = "1"
-TFA_INSTALL_TARGET:virt-aarch64 = "flash.bin"
+TFA_UBOOT = "1"
+TFA_INSTALL_TARGET = "flash.bin"
 
 # Clean before building
 TFA_BUILD_TARGET:prepend:aarch64:qemuall = " clean "
 
-do_compile:append:virt-aarch64() {
+do_compile:append() {
     # meta-arm provides an almost identical implementation, but per machine. Documented by
     # https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git/tree/docs/plat/qemu.rst
     dd if=/dev/zero of=${BUILD_DIR}/flash.bin bs=1M count=64

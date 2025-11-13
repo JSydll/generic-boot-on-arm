@@ -1,0 +1,23 @@
+# short-description: Create a partitioned SD card image supporting UEFI-based secure boot and update
+# long-description:
+# Create an image with an ESP for capsule updates, separate partitions for kernel UKIs and read-only rootfs as well as
+# a shared data partition.
+# In the first sectors, the boot container with firmware and bootloader is deployed.
+
+bootloader --ptable gpt
+
+# Raw sector for the boot container
+part imx-boot --source rawcopy --sourceparams="file=${BOOT_CONTAINER_BIN}" --ondisk mmcblk --no-table --align ${IMX_BOOT_SEEK}
+
+# EFI system partition for capsule update
+part --ondisk mmcblk --fstype=vfat --label ESP --part-type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B --fixed-size 64M --align 1024
+
+# Separate kernel partitions to verify UKIs prior to loading rootfs with dm-verity
+part --ondisk mmcblk --uuid d7804755-193a-47ef-8fa6-966d45aab7a2 --source bootimg-partition --fstype=squashfs --fixed-size 50M --align 8192
+part --ondisk mmcblk --uuid 52c9b548-2548-4b57-b8df-8193e50e9b45 --source empty --fstype=squashfs --fixed-size 50M --align 8192
+
+# Rootfs partitions
+part / --ondisk mmcblk --uuid 020977a6-f364-4499-a61c-bc4708908265 --source rawcopy --sourceparams="file=${IMGDEPLOYDIR}/${DM_VERITY_IMAGE}-${MACHINE}${IMAGE_NAME_SUFFIX}.${DM_VERITY_IMAGE_TYPE}.verity" --fixed-size 250M --align 8192
+part / --ondisk mmcblk --uuid 99979fdc-3a79-452d-a62a-cf09030f241b --source empty --fstype=squashfs --fixed-size 250M --align 8192
+
+part /data --ondisk mmcblk --fstype=ext4 --size 400M --label data
