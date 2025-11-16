@@ -76,7 +76,11 @@ local_conf_header:
   versioning: |
     SOFTWARE_VERSION ??= "0.0"
 
-  common-security:
+  common-security: |
     # For now, keys are created in the build directory - a productive setup would require
     # proper key provisioning and infrastructure.
     SBSIGN_KEYS_DIR = "${TOPDIR}/secrets"
+
+    DM_VERITY_IMAGE = "secure-image-minimal"
+    DM_VERITY_IMAGE_TYPE = "squashfs"
+    IMAGE_CLASSES += "dm-verity-img"

@@ -5,7 +5,5 @@ SRC_URI:append = " \
     file://uefi-secureboot.cfg \
 "
 
-KERNEL_FEATURES += "cfg/efi-ext.scc"
-
 RRECOMMENDS:${PN} += "kernel-module-efivarfs"
 RRECOMMENDS:${PN} += "kernel-module-efivars"

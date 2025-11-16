@@ -7,15 +7,9 @@ header:
 
 machine: virt-aarch64
 
-target:
-  - secure-image-minimal
-  - secure-update-bundle
-
 local_conf_header:
-  virt-aarch64-security: |
-    IMAGE_CLASSES += "dm-verity-img"
-    DM_VERITY_IMAGE = "secure-image-minimal"
-    DM_VERITY_IMAGE_TYPE = "squashfs"
+  device-config: |
+    EMMC_BLOCK_DEV = "/dev/mmcblk0"
 
   versioning: |
     SOFTWARE_VERSION = "1.0"

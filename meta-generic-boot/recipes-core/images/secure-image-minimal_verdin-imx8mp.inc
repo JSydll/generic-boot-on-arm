@@ -1,17 +1,14 @@
 # Machine specific image configuration for verdin-imx8mp 
 #
 
-# Read-only rootfs
-#
-OVERLAYFS_ETC_DEVICE = "/dev/mmcblk1p7"
-
 # Kernel and UKI packaging
 #
+# Account for the DTBs being deployed in DEPLOYDIR without subdirectories
+KERNEL_DTB_PREFIX = ""
 do_uki[depends] += "linux-toradex-upstream:do_deploy"
 
 # Image configuration
 #
-
 IMAGE_FSTYPES:append = " wic.bmap"
 
 # Account for the deployment of the boot container on the SD card

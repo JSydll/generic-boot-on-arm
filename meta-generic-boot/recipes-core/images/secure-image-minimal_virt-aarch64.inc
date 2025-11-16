@@ -5,10 +5,6 @@
 #
 DEPENDS:append = " qemu-system-native "
 
-# Read-only rootfs
-#
-OVERLAYFS_ETC_DEVICE= "/dev/mmcblk0p6"
-
 # Kernel and UKI packaging
 #
 KERNEL_DEVICETREE = "devicetree/virt-aarch64.dtb"

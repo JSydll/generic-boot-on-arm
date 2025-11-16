@@ -19,13 +19,14 @@ inherit image-buildinfo
 IMAGE_BUILDINFO_VARS:append = " SOFTWARE_VERSION"
 
 # Testing support
-DEPENDS:append = " labgrid-env-config "
+DEPENDS:append = " labgrid-env-config"
 
 # Image features
 # Note that the rootfs is read-only, so all mountpoints must be created during build time.
 OVERLAYFS_ETC_CREATE_MOUNT_DIRS = "0"
 OVERLAYFS_ETC_MOUNT_POINT = "/data"
 OVERLAYFS_ETC_FSTYPE = "ext4"
+OVERLAYFS_ETC_DEVICE = "${EMMC_BLOCK_DEV}p6"
 
 IMAGE_FEATURES:append = " \
     read-only-rootfs \
@@ -66,6 +67,9 @@ UKI_PROFILE_boot_b[options] = "--cmdline='${CMDLINE_BASE} root=PARTUUID=99979fdc
 
 IMAGE_BOOT_FILES = "${UKI_FILENAME}"
 
+# Allow overwriting configuration from above
+require ${IMAGE_BOARD_SPECIFIC_INC}
+
 # Allow reuse of the partition images already created by wic
 do_copy_wic_partitions() {
     wic_workdir="${WORKDIR}/build-wic"
@@ -73,6 +77,3 @@ do_copy_wic_partitions() {
     cp -v "${wic_workdir}"/*.direct.p4 "${IMGDEPLOYDIR}"/${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}${IMAGE_NAME_SUFFIX}.verity.squashfs
 }
 addtask copy_wic_partitions after do_image_wic before do_image_complete
-
-# Note: Allow overwriting configuration from above
-require ${IMAGE_BOARD_SPECIFIC_INC}

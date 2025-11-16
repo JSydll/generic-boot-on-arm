@@ -7,7 +7,7 @@ SUMMARY = "Deploys machine specific labgrid environment configurations suitable 
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
-inherit deploy nopackages
+inherit deploy nopackages allarch
 
 ALLOW_EMPTY:${PN} = "1"
 
@@ -15,8 +15,7 @@ SRC_URI = " \
     file://lg-env-config.yml \
 "
 
-S = "${WORKDIR}/sources"
-UNPACKDIR = "${S}"
+S = "${UNPACKDIR}"
 
 LG_CONFIG_FILE = "lg-env-config-${MACHINE}-${PV}-${PR}.yml"
 # Our test setup expects artifacts to be published to a generic mount point

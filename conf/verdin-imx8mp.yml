@@ -5,9 +5,6 @@ header:
 
 machine: verdin-imx8mp
 
-target:
-  - core-image-minimal
-
 defaults:
   repos:
     branch: master
@@ -44,10 +41,17 @@ local_conf_header:
   toradex: |
     MACHINEOVERRIDES =. "mainline:use-mainline-bsp:"
 
-    # Security related features provided by Toradex
-    #MACHINE_FEATURES:append = " optee stmm "
-
-    # Remove contents defined in the machine.conf
+    # Remove contents defined in the machine conf
+    IMAGE_CLASSES:remove = "image_type_tezi"
     IMAGE_FSTYPES:remove = "teziimg"
-    IMAGE_BOOT_FILES = ""
-    WKS_FILE_DEPENDS:remove = " u-boot-default-script"
+    IMAGE_BOOT_FILES:remove = "boot.scr-${MACHINE};boot.scr"
+    WKS_FILE_DEPENDS:remove = "u-boot-default-script"
+
+  verdin-imx8mp-security: |
+    MACHINE_FEATURES:append = " efi uefi-secureboot"
+
+  device-config: |
+    EMMC_BLOCK_DEV = "/dev/mmcblk1"
+
+  versioning: |
+    SOFTWARE_VERSION = "0.1"
