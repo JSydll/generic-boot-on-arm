@@ -89,6 +89,20 @@ alias test-shell='run_in_testenv -i /bin/bash'
 alias test-run-pytest='run_in_testenv /usr/local/bin/pytest'
 # ----
 
+# Flash
+# ----
+function flash_device() {
+    if [[ "${TARGET_MACHINE}" != "${HW_MACHINE}" ]]; then
+        echo "Error: flash_device can only be used with TARGET_MACHINE=${HW_MACHINE}" >&2
+        return 1
+    fi
+
+    local artifact_path="${SCRIPT_DIR}/work/build/tmp/deploy/images/${HW_MACHINE}"
+    "${SCRIPT_DIR}/tools/flash/flash.sh" "${artifact_path}" "flash.bin" "secure-image-minimal-${HW_MACHINE}.rootfs.wic"
+}
+alias flash-device='flash_device'
+# ----
+
 # Pipeline helpers
 # ----
 function run_marked_tests() {
