@@ -99,6 +99,12 @@ Issues:
 
 Current status: no SetVariableRT in u-boot (barebox maybe?)
 
+Req. for auth. vars. strongly depends on thread model!
+
+Then, you'll need to ensure secure storage is under FW control
+
+Solution with StMM is quite complex, involves a firmware supplicant and a kernel supplicant for efivars access :(
+
 **Readings**:
 - Overview by Ilias at Linux Plumbers 2023 ([Session](https://lpc.events/event/17/contributions/1653/), [PDF](https://lpc.events/event/17/contributions/1653/attachments/1338/2682/Plumbers%20-%20EFI%20setvariable%20problems%20and%20solutions.pdf))
 
@@ -122,7 +128,8 @@ U-Boot has support for serving the hardware watchdog until ExitBootServices() (a
 ...
 
 Note: Given that some upstream features (like the `uki.bbclass`) were only recently published,
-none of the current LTS releases can be used.
+none of the current LTS releases can be used. See [Toradex Release Matrix](https://developer.toradex.com/software/toradex-embedded-software/embedded-linux-release-matrix/#current-releases)
+for the versions of core system components like u-boot and kernel.
 
 Why not using the Toradex distro and reference images? This spike is reduced to the bare minimum to get a clear
 understanding of the involved parts while avoiding too much noise coming in from other features.
