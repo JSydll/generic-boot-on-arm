@@ -29,6 +29,8 @@ do_install(){
     install -d ${D}${bindir}
     install -m 0755 ${UNPACKDIR}/efivar.py ${D}${bindir}/u-boot-efivar-tool
     install -m 0755 ${UNPACKDIR}/efivars-sync.py ${D}${bindir}/efivars-sync
+
+    sed -e "s|@@EMMC_BLOCK_DEV@@|${EMMC_BLOCK_DEV}|" -i ${UNPACKDIR}/run-efivars-sync.bash
     install -m 0755 ${UNPACKDIR}/run-efivars-sync.bash ${D}${bindir}/run-efivars-sync
 
     install -d ${D}${systemd_system_unitdir}

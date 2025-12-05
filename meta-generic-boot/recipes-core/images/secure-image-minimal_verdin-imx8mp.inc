@@ -9,12 +9,15 @@ do_uki[depends] += "linux-toradex-upstream:do_deploy"
 
 # Image configuration
 #
+# WARNING: u-boot-efivars-sync is a development-only workaround!
+IMAGE_INSTALL:append = " \
+    efivar \
+    u-boot-efivars-sync \
+"
 IMAGE_FSTYPES:append = " wic.bmap"
 
-# Account for the deployment of the boot container on the SD card
-# TODO: Switch to onboard eMMC once development is done.
-BOOT_CONTAINER_BIN = "flash.bin-verdin-imx8mp-sd"
-WKS_FILE = "secure-system-image.sdcard.wks.in"
-
+# While the boot container is not a part of the wic image (given it resides
+# in the eMMC boot partition), it's still required and should be built for 
+# deployment on the device.
 do_image_wic[depends] += " u-boot-toradex:do_deploy"
 do_clean[depends] += " u-boot-toradex:do_clean"

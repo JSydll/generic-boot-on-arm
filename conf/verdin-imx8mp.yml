@@ -51,7 +51,7 @@ local_conf_header:
     ACCEPT_FSL_EULA = "1"
 
   toradex-bsp: |
-    MACHINEOVERRIDES =. "mainline:use-mainline-bsp:"
+    MACHINEOVERRIDES =. "use-mainline-bsp:"
 
     # Remove contents defined in the machine.conf
     IMAGE_CLASSES:remove = "image_type_tezi"
@@ -67,7 +67,7 @@ local_conf_header:
     #TDX_OPTEE_ENABLE = "1"
 
   device-config: |
-    EMMC_BLOCK_DEV = "/dev/mmcblk1"
+    EMMC_BLOCK_DEV = "/dev/mmcblk2"
 
   versioning: |
     SOFTWARE_VERSION = "0.1"

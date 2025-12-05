@@ -1,0 +1,59 @@
+From 9d8d641c77f6c281a78fa203f0b846d5cd66fab3 Mon Sep 17 00:00:00 2001
+From: Joschka Seydell <joschka@seydell.org>
+Date: Fri, 5 Dec 2025 21:36:08 +0100
+Subject: [PATCH] veritysetup: Revert changes to output format (do not print
+ units).
+
+Upstream-Status: Inappropriate [oe specific]
+
+Signed-off-by: Joschka Seydell <joschka@seydell.org>
+---
+ src/veritysetup.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/src/veritysetup.c b/src/veritysetup.c
+index d97c695..b46240c 100644
+--- a/src/veritysetup.c
++++ b/src/veritysetup.c
+@@ -379,8 +379,8 @@ static int action_status(void)
+ 			vp.flags & CRYPT_VERITY_ROOT_HASH_SIGNATURE ? " (with signature)" : "");
+ 
+ 		log_std("  hash type:   %u\n", vp.hash_type);
+-		log_std("  data block:  %u [bytes]\n", vp.data_block_size);
+-		log_std("  hash block:  %u [bytes]\n", vp.hash_block_size);
++		log_std("  data block:  %u\n", vp.data_block_size);
++		log_std("  hash block:  %u\n", vp.hash_block_size);
+ 		log_std("  hash name:   %s\n", vp.hash_name);
+ 		log_std("  salt:        ");
+ 		if (vp.salt_size)
+@@ -394,7 +394,7 @@ static int action_status(void)
+ 			log_std("  data loop:   %s\n", backing_file);
+ 			free(backing_file);
+ 		}
+-		log_std("  size:        %" PRIu64 " [512-byte units] (%" PRIu64 " [bytes])\n", cad.size, cad.size * (uint64_t)SECTOR_SIZE);
++		log_std("  size:        %" PRIu64 " sectors\n", cad.size);
+ 		log_std("  mode:        %s\n", cad.flags & CRYPT_ACTIVATE_READONLY ?
+ 					   "readonly" : "read/write");
+ 
+@@ -403,8 +403,8 @@ static int action_status(void)
+ 			log_std("  hash loop:   %s\n", backing_file);
+ 			free(backing_file);
+ 		}
+-		log_std("  hash offset: %" PRIu64 " [512-byte units] (%" PRIu64 " [bytes])\n",
+-			vp.hash_area_offset * vp.hash_block_size / SECTOR_SIZE, vp.hash_area_offset * vp.hash_block_size);
++		log_std("  hash offset: %" PRIu64 " sectors\n",
++			vp.hash_area_offset * vp.hash_block_size / 512);
+ 
+ 		if (vp.fec_device) {
+ 			log_std("  FEC device:  %s\n", vp.fec_device);
+@@ -412,8 +412,8 @@ static int action_status(void)
+ 				log_std("  FEC loop:    %s\n", backing_file);
+ 				free(backing_file);
+ 			}
+-			log_std("  FEC offset:  %" PRIu64 " [512-byte units] (%" PRIu64 " [bytes])\n",
+-				vp.fec_area_offset * vp.hash_block_size / SECTOR_SIZE, vp.fec_area_offset * vp.hash_block_size);
++			log_std("  FEC offset:  %" PRIu64 " sectors\n",
++				vp.fec_area_offset * vp.hash_block_size / 512);
+ 			log_std("  FEC roots:   %u\n", vp.fec_roots);
+ 		}
+ 
