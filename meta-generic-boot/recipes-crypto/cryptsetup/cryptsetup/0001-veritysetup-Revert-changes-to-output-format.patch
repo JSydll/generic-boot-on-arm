@@ -1,4 +1,4 @@
-From 9d8d641c77f6c281a78fa203f0b846d5cd66fab3 Mon Sep 17 00:00:00 2001
+From 59362b2516d9690a4e3aebfce7cb6b1c08d82569 Mon Sep 17 00:00:00 2001
 From: Joschka Seydell <joschka@seydell.org>
 Date: Fri, 5 Dec 2025 21:36:08 +0100
 Subject: [PATCH] veritysetup: Revert changes to output format (do not print
@@ -8,9 +8,39 @@ Upstream-Status: Inappropriate [oe specific]
 
 Signed-off-by: Joschka Seydell <joschka@seydell.org>
 ---
- src/veritysetup.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+ lib/verity/verity.c |  8 ++++----
+ src/veritysetup.c   | 14 +++++++-------
+ 2 files changed, 11 insertions(+), 11 deletions(-)
 
+diff --git a/lib/verity/verity.c b/lib/verity/verity.c
+index 65f5f4e..0aa73d6 100644
+--- a/lib/verity/verity.c
++++ b/lib/verity/verity.c
+@@ -423,9 +423,9 @@ int VERITY_dump(struct crypt_device *cd,
+ 	log_std(cd, "UUID:            \t%s\n", crypt_get_uuid(cd) ?: "");
+ 	log_std(cd, "Hash type:       \t%u\n", verity_hdr->hash_type);
+ 	log_std(cd, "Data blocks:     \t%" PRIu64 "\n", verity_hdr->data_size);
+-	log_std(cd, "Data block size: \t%u [bytes]\n", verity_hdr->data_block_size);
++	log_std(cd, "Data block size: \t%u\n", verity_hdr->data_block_size);
+ 	log_std(cd, "Hash blocks:     \t%" PRIu64 "\n", hash_blocks);
+-	log_std(cd, "Hash block size: \t%u [bytes]\n", verity_hdr->hash_block_size);
++	log_std(cd, "Hash block size: \t%u\n", verity_hdr->hash_block_size);
+ 	log_std(cd, "Hash algorithm:  \t%s\n", verity_hdr->hash_name);
+ 	if (fec_device && fec_blocks) {
+ 		log_std(cd, "FEC RS roots:   \t%" PRIu32 "\n", verity_hdr->fec_roots);
+@@ -447,10 +447,10 @@ int VERITY_dump(struct crypt_device *cd,
+ 
+ 	/* As dump can take only hash device, we have no idea about offsets here. */
+ 	if (verity_hdr->hash_area_offset == 0)
+-		log_std(cd, "Hash device size: \t%" PRIu64 " [bytes]\n", verity_blocks * verity_hdr->hash_block_size);
++		log_std(cd, "Hash device size: \t%" PRIu64 "\n", verity_blocks * verity_hdr->hash_block_size);
+ 
+ 	if (fec_device && verity_hdr->fec_area_offset == 0 && fec_blocks && !fec_on_hash_device)
+-		log_std(cd, "FEC device size: \t%" PRIu64 " [bytes]\n", rs_blocks * verity_hdr->data_block_size);
++		log_std(cd, "FEC device size: \t%" PRIu64 "\n", rs_blocks * verity_hdr->data_block_size);
+ 
+ 	return 0;
+ }
 diff --git a/src/veritysetup.c b/src/veritysetup.c
 index d97c695..b46240c 100644
 --- a/src/veritysetup.c
