@@ -7,6 +7,8 @@ SRC_URI:append = " \
     file://dm-verity.cfg \
     file://squashfs.cfg \
     file://overlayfs.cfg \
+    file://vfat.cfg \
+    file://rauc.cfg \
     file://uefi-secureboot.cfg \
 "
 
