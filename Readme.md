@@ -1,10 +1,10 @@
 # Generic (UEFI-based) verified boot and update on ARM
 
-This repository aims to provide a reference implementation for generalizing some of the concepts known
-from the server and desktop world to embedded devices.
+This repository contains a spike for generalizing some of the concepts known from the server and 
+desktop world to embedded devices.
 
-It stands on the shoulders of giants - namely Linaro and Siemens - already pushing this approach
-since a few year. Yet, it tries to further simplify the overall setup and only include the basic
+It stands on the shoulders of giants - namely arm, Linaro and Siemens - already pushing this approach
+since a few years. Yet, it tries to further simplify the overall setup and only include the basic
 verified boot and A/B update scheme here.
 
 Currently, only an integration for `qemuarm64` is available. A port on a representative hardware board may follow.
@@ -112,6 +112,27 @@ U-Boot has support for serving the hardware watchdog until ExitBootServices() (a
 
 **Readings**:
 - Discussions about the u-boot implementation in the [trusted-firmware.org mailinglist](https://lists.trustedfirmware.org/archives/list/tf-a@lists.trustedfirmware.org/thread/MLS2QZ7LLTEMOUIU5OUF4YMQ67UHAADV/)
+
+## Current state of implementation
+
+**qemuarm64**:
+...
+
+**verdin-imx8mp**:
+...
+
+Note: Given that some upstream features (like the `uki.bbclass`) were only recently published,
+none of the current LTS releases can be used.
+
+Why not using the Toradex distro and reference images? This spike is reduced to the bare minimum to get a clear
+understanding of the involved parts while avoiding too much noise coming in from other features.
+This being said, the Toradex layers as well as the Torizon platform come with a lot more features and a set of
+reasonably made decisions for productive use cases. You should definitely consider using this instead of rolling
+your own solutions just for the sake of it.
+
+To be clarified:
+
+For QEMU support of the `imx8mp-evk` board model, version 10 is required and needs to be built from sources.
 
 ## Loose ends
 

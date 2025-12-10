@@ -1,0 +1,18 @@
+# Configure the internal eMMC for flashing
+set target mmc2
+# Location of the fastboot buffer as configured in verdin-imx8mp_defconfig:
+set fb-addr 0x44200000
+
+# Flash the boot container to mmc2boot0 partition
+# Note: By convention, the hardware partitions are as follows (see https://docs.u-boot.org/en/latest/usage/partitions.html):
+# - 0: User partition (full device, default)
+# - 1: Boot partition 1
+# - 2: Boot partition 2
+# - 3: RPMB partition (if available)
+flash flash.bin 0 hwpart 1
+
+# Flash the system image to the user partition
+flash system-image.wic 0
+
+# Reset the system
+run acmd:reset

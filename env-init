@@ -3,13 +3,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 readonly SCRIPT_DIR
 
 readonly TEST_ARTIFACTS_DIR="${TEST_ARTIFACTS_DIR:-${SCRIPT_DIR}/work/artifacts}"
-readonly GENERATED_LG_CONFIG="/artifacts/lg-env-config.yml"
 
 readonly KAS_CMD="${SCRIPT_DIR}/tools/build/kas-container.4.5"
 export KAS_WORK_DIR="${SCRIPT_DIR}/work"
 readonly KAS_CONF_BASE="${SCRIPT_DIR}/conf"
 
-readonly HW_MACHINE="N/A"
+readonly HW_MACHINE="verdin-imx8mp"
 readonly VIRT_MACHINE="virt-aarch64"
 
 # Defaults
@@ -29,7 +28,7 @@ function testenv_setup() {
 }
 
 function set_machine() {
-    export TARGET_MACHINE="$1"
+    export TARGET_MACHINE="$1" 
 }
 
 function get_build_conf() {
@@ -56,7 +55,7 @@ function publish_test_artifacts() {
         cp "${src_path}/flash.bin" "${TEST_ARTIFACTS_DIR}/flash.bin" &>/dev/null || true
         cp "${src_path}/secure-image-minimal-${VIRT_MACHINE}.rootfs.wic.qcow2" "${TEST_ARTIFACTS_DIR}/system-image.wic.qcow2" &>/dev/null || true
         cp "${src_path}/secure-update-bundle-${machine}.raucb" "${TEST_ARTIFACTS_DIR}/secure-update-bundle-${machine}.raucb" &>/dev/null || true
-        cp "${src_path}/lg-env-config.yml" "${TEST_ARTIFACTS_DIR}/lg-env-config.yml" &>/dev/null || true         
+        cp "${src_path}/lg-env-config-${machine}.yml" "${TEST_ARTIFACTS_DIR}/lg-env-config-${machine}.yml" &>/dev/null || true         
     done
 }
 
@@ -76,7 +75,7 @@ function run_in_testenv() {
     fi
     # For some unknown reason, pytest is not able to locate the pytest.ini
     # without explicitly specifying it in non-interactive runs.
-    PYTEST_OPTIONS="-c /test/pytest.ini --lg-env ${GENERATED_LG_CONFIG}"
+    PYTEST_OPTIONS="-c /test/pytest.ini --lg-env /artifacts/lg-env-config-${TARGET_MACHINE}.yml"
     # Spawn an ephemeral test container and pass command parameters to it
     docker run --rm -t \
         -v "${SCRIPT_DIR}/test"/:/test/ \
@@ -88,6 +87,20 @@ function run_in_testenv() {
 
 alias test-shell='run_in_testenv -i /bin/bash'
 alias test-run-pytest='run_in_testenv /usr/local/bin/pytest'
+# ----
+
+# Flash
+# ----
+function flash_device() {
+    if [[ "${TARGET_MACHINE}" != "${HW_MACHINE}" ]]; then
+        echo "Error: flash_device can only be used with TARGET_MACHINE=${HW_MACHINE}" >&2
+        return 1
+    fi
+
+    local artifact_path="${SCRIPT_DIR}/work/build/tmp/deploy/images/${HW_MACHINE}"
+    "${SCRIPT_DIR}/tools/flash/flash.sh" "${artifact_path}" "flash.bin" "secure-image-minimal-${HW_MACHINE}.rootfs.wic"
+}
+alias flash-device='flash_device'
 # ----
 
 # Pipeline helpers

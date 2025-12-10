@@ -1,0 +1,7 @@
+# snagrecover configuration for imx8mp
+# 
+# Note: Choose imx865 SoC family when running snagrecover.
+paths-relative-to: THIS_FILE
+
+flash-bin:
+  path: toradex-imx-boot-recovery.tezi-7.4.0b8
