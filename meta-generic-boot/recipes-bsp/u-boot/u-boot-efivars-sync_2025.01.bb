@@ -12,7 +12,7 @@ inherit systemd
 SRC_URI = " \
     file://efivar.py \
     file://efivars-sync.py \
-    file://run-efivars-sync.bash \
+    file://run-efivars-sync.bash.in \
     file://efivars-sync.service \
 "
 
@@ -30,7 +30,8 @@ do_install(){
     install -m 0755 ${UNPACKDIR}/efivar.py ${D}${bindir}/u-boot-efivar-tool
     install -m 0755 ${UNPACKDIR}/efivars-sync.py ${D}${bindir}/efivars-sync
 
-    sed -e "s|@@EMMC_BLOCK_DEV@@|${EMMC_BLOCK_DEV}|" -i ${UNPACKDIR}/run-efivars-sync.bash
+    sed -e "s|@@EMMC_BLOCK_DEV@@|${EMMC_BLOCK_DEV}|" \
+            ${UNPACKDIR}/run-efivars-sync.bash.in > ${UNPACKDIR}/run-efivars-sync.bash
     install -m 0755 ${UNPACKDIR}/run-efivars-sync.bash ${D}${bindir}/run-efivars-sync
 
     install -d ${D}${systemd_system_unitdir}
