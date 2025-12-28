@@ -34,7 +34,6 @@ IMAGE_FEATURES:append = " \
 "
 
 # Image contents (do not pull in the packagegroup-base-extended as done by core-image.bbclass)
-# TODO: Add OP-TEE client
 IMAGE_INSTALL = " \
     packagegroup-core-boot \
     ${CORE_IMAGE_EXTRA_INSTALL} \

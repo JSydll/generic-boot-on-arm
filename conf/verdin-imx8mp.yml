@@ -47,6 +47,9 @@ repos:
     branch: scarthgap-7.x.y-next
 
 local_conf_header:
+  device-config: |
+    EMMC_BLOCK_DEV = "/dev/mmcblk2"
+
   imx-bsp: |
     ACCEPT_FSL_EULA = "1"
 
@@ -60,14 +63,19 @@ local_conf_header:
     WKS_FILE_DEPENDS:remove = " u-boot-default-script"
 
   verdin-imx8mp-security: |
-    MACHINE_FEATURES:append = " efi uefi-secureboot"
+    MACHINE_FEATURES:append = " optee efi uefi-secureboot"
 
-    # Currently leave OP-TEE disabled
-    # MACHINE_FEATURES:append = " optee"
-    #TDX_OPTEE_ENABLE = "1"
+    # ATTENTION: Mainline OP-TEE is painfully known not to work well with NXP SoCs
+    PREFERRED_VERSION_optee-os = "4.6.0.imx"
 
-  device-config: |
-    EMMC_BLOCK_DEV = "/dev/mmcblk2"
+    OPTEE_VARSTORE_SUPPLICANT = "edk2-firmware"
+    OPTEE_VARSTORE_SUPPLICANT_BIN = "edk2-stmm.bin"
+    # Activate BSP specific configuration as provided by Toradex.
+    # While this might be a bit more than the vanilla integration,
+    # most parts would need to be replicated.
+    TDX_OPTEE_ENABLE = "1"
+    TDX_OPTEE_FS_RPMB = "1"
+    TDX_OPTEE_FS_RPMB_MODE = "development"
 
   versioning: |
     SOFTWARE_VERSION = "0.1"

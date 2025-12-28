@@ -2,11 +2,11 @@
 PROVIDES:remove = "virtual/bootloader"
 COMPATIBLE_MACHINE = "${MACHINE}"
 
-EDK2_BUILD_RELEASE = "0"
+EDK2_BUILD_RELEASE = "1"
 EDK2_PLATFORM      = "MmStandaloneRpmb"
 EDK2_PLATFORM_DSC  = "Platform/StandaloneMm/PlatformStandaloneMmPkg/PlatformStandaloneMmRpmb.dsc"
 EDK2_BIN_NAME      = "BL32_AP_MM.fd"
 
 do_deploy:append() {
-    mv ${DEPLOYDIR}/uefi.bin ${DEPLOYDIR}/edk2-stmm.bin
+    mv ${DEPLOYDIR}/uefi.bin ${DEPLOYDIR}/${OPTEE_VARSTORE_SUPPLICANT_BIN}
 }

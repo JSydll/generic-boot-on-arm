@@ -13,7 +13,13 @@ SRC_URI:append = " \
     file://squashfs.cfg \
     file://uefi-secureboot.cfg \
     file://uefi-insecure-vars.cfg \
+    file://uefi-authenticated-vars.cfg \
     file://uefi-secureboot-bootslots.cfg \
 "
 # TODO: Enforce secure boot by adding uefi-secureboot-enable.cfg
-# TODO: Enable authenticated EFI variables by adding uefi-authenticated-vars.cfg
+
+# Account for the dependencies for building the boot container
+do_compile[depends] += " \
+    imx-atf:do_deploy \
+    optee-os:do_deploy \
+"

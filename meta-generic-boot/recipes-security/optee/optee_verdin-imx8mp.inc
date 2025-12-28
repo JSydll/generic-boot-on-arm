@@ -1,9 +1,12 @@
-DEPENDS:append = " edk2-firmware"
-EDK2_STANDALONE_MM_BIN = "edk2-stmm.bin"
 
-EXTRA_OEMAKE += "CFG_STMM_PATH=../../build/${EDK2_STANDALONE_MM_BIN}"
+EXTRA_OEMAKE += "\
+    CFG_STMM_PATH=../../build/${OPTEE_VARSTORE_SUPPLICANT_BIN} \
+"
 
+# Make the varstore supplicant available for including it in the build
 do_compile:prepend() {
-    cp ${DEPLOY_DIR_IMAGE}/${EDK2_STANDALONE_MM_BIN} ${B}
+    cp ${DEPLOY_DIR_IMAGE}/${OPTEE_VARSTORE_SUPPLICANT_BIN} ${B}
 }
+
+do_compile[depends] += "${OPTEE_VARSTORE_SUPPLICANT}:do_deploy"
 
