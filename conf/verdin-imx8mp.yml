@@ -77,5 +77,8 @@ local_conf_header:
     TDX_OPTEE_FS_RPMB = "1"
     TDX_OPTEE_FS_RPMB_MODE = "development"
 
+  no-network:
+    PACKAGECONFIG:remove:pn-systemd = "networkd timesyncd nss-resolve resolved"
+
   versioning: |
     SOFTWARE_VERSION = "0.1"
