@@ -9,6 +9,7 @@ SRC_URI:append = " \
     file://overlayfs.cfg \
     file://vfat.cfg \
     file://rauc.cfg \
+    \
     file://uefi-secureboot.cfg \
 "
 
