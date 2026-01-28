@@ -8,12 +8,12 @@ readonly KAS_CMD="${SCRIPT_DIR}/tools/build/kas-container.4.5"
 export KAS_WORK_DIR="${SCRIPT_DIR}/work"
 readonly KAS_CONF_BASE="${SCRIPT_DIR}/conf"
 
-readonly HW_MACHINE="verdin-imx8mp"
 readonly VIRT_MACHINE="virt-aarch64"
+readonly HW_MACHINE="verdin-imx8mp"
 
 # Defaults
 # ----
-TARGET_MACHINE="${TARGET_MACHINE:-${VIRT_MACHINE}}"
+TARGET_MACHINE="${TARGET_MACHINE:-${HW_MACHINE}}"
 BUILD_TYPE="debug"
 TEST_DOCKER_IMAGE="emulated-linux-testing"
 # ----

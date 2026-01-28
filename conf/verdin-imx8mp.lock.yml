@@ -1,0 +1,30 @@
+header:
+    version: 14
+overrides:
+    repos:
+        bitbake:
+            commit: 2c6c40bdab8ebc6c04fe9992524add967fb4a053
+        meta-arm-contrib:
+            commit: f0631af31542c7057e5902eb39c9427636de8644
+        meta-freescale:
+            commit: 36f3e4d195752a5d5cbbde462168f876fe2832d9
+        meta-freescale-3rdparty:
+            commit: b2b1987841018013006f909f817a3e9b034c6227
+        meta-openembedded:
+            commit: 7bbe4a4e200452b1fd6c09c7fcf36c4b229146f6
+        meta-rauc:
+            commit: c319a469f9ad366b284f6f04402f67c69fa9b35e
+        meta-secure-core:
+            commit: fa2c224317d945ef60aed15c27dc7b1f970f13f7
+        meta-security:
+            commit: 9e6d962250aab6e5319215f15b0201ef233c46cd
+        meta-toradex-bsp-common:
+            commit: 9c3b5fe697f1d210c41fad0cd1f8b1261d6196fe
+        meta-toradex-nxp:
+            commit: 2de61b5c8991f42549600b155a3371d3b826f2cd
+        meta-toradex-security:
+            commit: 9349ab8f10cd796e7c6db55e8881cacf9a79561c
+        meta-yocto:
+            commit: c23c19e0b300812bad314f1d0a901965315271ae
+        openembedded-core:
+            commit: f0d8ff0bfbe9fdff794d4845bdde7122e8ef0e88

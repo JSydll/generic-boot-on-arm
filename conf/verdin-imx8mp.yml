@@ -72,7 +72,7 @@ local_conf_header:
     OPTEE_VARSTORE_SUPPLICANT_BIN = "edk2-stmm.bin"
     # Activate BSP specific configuration as provided by Toradex.
     # While this might be a bit more than the vanilla integration,
-    # most parts would need to be replicated.
+    # most parts would need to be replicated otherwise.
     TDX_OPTEE_ENABLE = "1"
     TDX_OPTEE_FS_RPMB = "1"
     TDX_OPTEE_FS_RPMB_MODE = "development"
