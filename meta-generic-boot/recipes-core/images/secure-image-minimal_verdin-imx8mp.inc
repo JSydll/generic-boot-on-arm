@@ -9,13 +9,10 @@ do_uki[depends] += "linux-toradex-upstream:do_deploy"
 
 # Image configuration
 #
-# WARNING: u-boot-efivars-sync is a development-only workaround!
 IMAGE_INSTALL:append = " \
     optee-os \
     optee-client \
-    \
     efivar \
-    u-boot-efivars-sync \
 "
 IMAGE_FSTYPES:append = " wic.bmap"
 
