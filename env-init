@@ -4,7 +4,7 @@ readonly SCRIPT_DIR
 
 readonly TEST_ARTIFACTS_DIR="${TEST_ARTIFACTS_DIR:-${SCRIPT_DIR}/work/artifacts}"
 
-readonly KAS_CMD="${SCRIPT_DIR}/tools/build/kas-container.4.5"
+readonly KAS_CMD="${SCRIPT_DIR}/tools/build/kas-container.5.1"
 export KAS_WORK_DIR="${SCRIPT_DIR}/work"
 readonly KAS_CONF_BASE="${SCRIPT_DIR}/conf"
 
