@@ -70,12 +70,27 @@ local_conf_header:
 
     OPTEE_VARSTORE_SUPPLICANT = "edk2-firmware"
     OPTEE_VARSTORE_SUPPLICANT_BIN = "edk2-stmm.bin"
-    # Activate BSP specific configuration as provided by Toradex.
-    # While this might be a bit more than the vanilla integration,
-    # most parts would need to be replicated otherwise.
+
+    # Activate BSP specific configuration as provided by meta-toradex-security.
+    # Note that the recommended way is to inherit corresponding classes, but the configuration 
+    # here should be as lean as possible. Of course, features like bootloader hardening will be
+    # missing then.
     TDX_OPTEE_ENABLE = "1"
     TDX_OPTEE_FS_RPMB = "1"
     TDX_OPTEE_FS_RPMB_MODE = "development"
+
+    # Boot container signing
+    IMX_CST_BASEPATH = "${PKI_BASEPATH}/boot-containers"
+    TDX_IMX_HAB_CST_BIN = "${IMX_CST_BASEPATH}/bin/cst"
+    # Note: The NXP CST expects the keys directory next to the certs directory specified here
+    TDX_IMX_HAB_CST_CERTS_DIR = "${IMX_CST_BASEPATH}/crts"
+    # In key revocation scenarios, this would be incremented.
+    TDX_IMX_HAB_CST_SRK_INDEX = "1"
+    TDX_IMX_HAB_CST_CRYPTO = "rsa"
+    TDX_IMX_HAB_CST_KEY_SIZE = "2048"
+    TDX_IMX_HAB_CST_SRK_CA = "1"
+
+    TDX_IMX_HAB_ENABLE = "1"
 
   no-network:
     PACKAGECONFIG:remove:pn-systemd = "networkd timesyncd nss-resolve resolved"

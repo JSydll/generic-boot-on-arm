@@ -6,9 +6,6 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 RAUC_BUNDLE_COMPATIBLE = "${MACHINE} secure"
 RAUC_BUNDLE_FORMAT = "verity"
 
-RAUC_KEY_FILE = "${SBSIGN_KEYS_DIR}/updates.key.pem"
-RAUC_CERT_FILE = "${SBSIGN_KEYS_DIR}/updates.cert.pem"
-
 RAUC_BUNDLE_SLOTS = "uki rootfs"
 
 BASE_IMAGE = "secure-image-minimal"
