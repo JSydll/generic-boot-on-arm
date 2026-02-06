@@ -80,17 +80,15 @@ local_conf_header:
     TDX_OPTEE_FS_RPMB_MODE = "development"
 
     # Boot container signing
+    # Note: The integration provided in meta-toradex-security does not work for mainstream u-boot.
     IMX_CST_BASEPATH = "${PKI_BASEPATH}/boot-containers"
-    TDX_IMX_HAB_CST_BIN = "${IMX_CST_BASEPATH}/bin/cst"
+    IMX_CST_TOOL_PATH = "${IMX_CST_BASEPATH}/bin"
     # Note: The NXP CST expects the keys directory next to the certs directory specified here
-    TDX_IMX_HAB_CST_CERTS_DIR = "${IMX_CST_BASEPATH}/crts"
+    IMX_HAB_CERTS_DIR = "${IMX_CST_BASEPATH}/crts"
     # In key revocation scenarios, this would be incremented.
-    TDX_IMX_HAB_CST_SRK_INDEX = "1"
-    TDX_IMX_HAB_CST_CRYPTO = "rsa"
-    TDX_IMX_HAB_CST_KEY_SIZE = "2048"
-    TDX_IMX_HAB_CST_SRK_CA = "1"
-
-    TDX_IMX_HAB_ENABLE = "1"
+    IMX_HAB_CST_SRK_INDEX = "1"
+    IMX_HAB_CST_KEY_SIZE = "2048"
+    IMX_HAB_CST_DIG_ALGO = "sha256"
 
   no-network:
     PACKAGECONFIG:remove:pn-systemd = "networkd timesyncd nss-resolve resolved"
