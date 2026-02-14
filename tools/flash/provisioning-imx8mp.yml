@@ -4,5 +4,5 @@
 paths-relative-to: THIS_FILE
 
 flash-bin:
-  # Depending on the use case, the boot container may be signed or still unsigned.
-  path: recovery-flash.bin
+  # The boot container for final provisioning must be signed and the HAB secure boot enabled!
+  path: provisioning-flash.bin

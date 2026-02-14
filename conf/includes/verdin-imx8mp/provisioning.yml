@@ -1,0 +1,11 @@
+header:
+  version: 14
+
+local_conf_header:
+  provisioning: |
+    # We want to see what OP-TEE is doing during provisioning
+    TDX_OPTEE_DEBUG = "1"
+    # Warning: Enabling this and using the boot container built by this configuration
+    # on a device without HAB secure boot enabled will permanently brick the device,
+    # as the RPMB will refuse all writes after closing the device.
+    OPTEE_RPMB_WRITE_KEY = "1"

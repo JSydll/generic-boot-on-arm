@@ -27,3 +27,17 @@ The following steps were done to populate the contents of the directories:
    ```
 
 3. Deploy the CST binary to use in the `bin` folder.
+
+# Writing the fuses
+
+The build creates a `fuse-cmds.txt` files with u-boot commands for burning the SRK hashes into the
+corresponding fuses. This can be done via the recovery environment, for example as follows:
+
+```bash
+./tools/flash/run-recovery.sh
+
+./tools/flash/run-fastboot-cmd.sh ucmd:'fuse prog -y 6 0 0x....'
+...
+```
+
+Note: The written values will only be effective **after a reboot**.

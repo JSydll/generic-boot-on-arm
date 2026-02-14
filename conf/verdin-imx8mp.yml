@@ -72,19 +72,25 @@ local_conf_header:
     OPTEE_VARSTORE_SUPPLICANT_BIN = "edk2-stmm.bin"
 
     # Activate BSP specific configuration as provided by meta-toradex-security.
-    # Note that the recommended way is to inherit corresponding classes, but the configuration 
-    # here should be as lean as possible. Of course, features like bootloader hardening will be
-    # missing then.
+    # Note: The classes provided there for OP-TEE and signing functionalities aren't practical
+    # here, as they have are wider scope and in some cases do not account for the requirements
+    # implied by the UEFI based boot sequence.
     TDX_OPTEE_ENABLE = "1"
     TDX_OPTEE_FS_RPMB = "1"
-    TDX_OPTEE_FS_RPMB_MODE = "development"
+    # As the StandaloneMM TA starts using the RPMB during bootloader phase already, we must make
+    # sure to not accidentally write the authentication key on an open device (as the HUK from 
+    # which the key is derived is not fused yet at this point).
+    OPTEE_RPMB_WRITE_KEY ?= "0"
 
     # Boot container signing
-    # Note: The integration provided in meta-toradex-security does not work for mainstream u-boot.
+    # Note: Mainstream u-boot supports simplified signing, so there's no need for the implementation
+    # provided in meta-toradex-security.
     IMX_CST_BASEPATH = "${PKI_BASEPATH}/boot-containers"
     IMX_CST_TOOL_PATH = "${IMX_CST_BASEPATH}/bin"
     # Note: The NXP CST expects the keys directory next to the certs directory specified here
     IMX_HAB_CERTS_DIR = "${IMX_CST_BASEPATH}/crts"
+    IMX_HAB_SRK_TABLE = "${IMX_HAB_CERTS_DIR}/SRK_1_2_3_4_table.bin"
+    IMX_HAB_FUSE_TABLE = "${IMX_HAB_CERTS_DIR}/SRK_1_2_3_4_fuse.bin"
     # In key revocation scenarios, this would be incremented.
     IMX_HAB_CST_SRK_INDEX = "1"
     IMX_HAB_CST_KEY_SIZE = "2048"

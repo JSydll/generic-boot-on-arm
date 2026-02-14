@@ -1,18 +1,11 @@
-# RPMB configuration provided by meta-toradex-security
+# Extend the basic OP-TEE configuration provided by meta-toradex-security,
+# which is enabled by TDX_OPTEE_ENABLE.
+# To avoid accidentally fusing the auth key during development / on an open device,
+# we use a custom variable to control this part of the behavior.
 EXTRA_OEMAKE += "\
     CFG_STMM_PATH=../../build/${OPTEE_VARSTORE_SUPPLICANT_BIN} \
+    ${@ bb.utils.contains('OPTEE_RPMB_WRITE_KEY', '1', 'CFG_RPMB_WRITE_KEY=y CFG_RPMB_RESET_FAT=y', '', d)} \
 "
-# Note: The i.MX Linux User's Guide also lists the following config options
-# found to be not required in the given use case:
-#   CFG_ARM64_core=y
-#   CFG_IMX_SNVS=n
-#   CFG_NXP_CAAM=n
-#   CFG_CORE_DYN_SHM=y
-#   CFG_SCTLR_ALIGNMENT_CHECK=n
-#   CFG_CORE_HEAP_SIZE=2097152
-#   CFG_TEE_RAM_VA_SIZE=4194304
-#   CFG_PREALLOC_RPC_CACHE=n
-#   CFG_REE_FS=n
 
 # Make the varstore supplicant available for including it in the build
 do_compile:prepend() {
