@@ -6,12 +6,14 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 readonly SCRIPT_DIR
 
-readonly TORADEX_FASTBOOT_DEV_ID="1b67:4000"
-readonly RECOVERY_CONFIG="recovery-imx8mp.yml"
-
 readonly FLASHING_SCRIPT="flash-system.fbscr"
 readonly FLASHING_BOOTCONTAINER_IMAGE_FILE="flash.bin"
 readonly FLASHING_SYSTEM_IMAGE_FILE="system-image.wic"
+
+if [[ -z "${RECOVERY_FASTBOOT_DEV_ID}" ]]; then
+    echo "RECOVERY_FASTBOOT_DEV_ID is not set. This script is intended to be run after sourcing the env-init." 
+    exit 1
+fi
 
 ARTIFACTS_DIR="$1"
 BOOTCONTAINER_IMAGE_NAME="$2"
@@ -26,17 +28,15 @@ readonly BOOTCONTAINER_IMAGE_PATH="${ARTIFACTS_DIR}/${BOOTCONTAINER_IMAGE_NAME}"
 readonly SYSTEM_IMAGE_PATH="${ARTIFACTS_DIR}/${SYSTEM_IMAGE_NAME}"
 echo "Preparing to flash ${BOOTCONTAINER_IMAGE_PATH} and ${SYSTEM_IMAGE_PATH}..."
 
-read -p "Confirm device is in recovery mode (press Enter to continue)..."
-
 pushd ${SCRIPT_DIR}
 # Cleanup on exit
 trap 'rm -f ${FLASHING_BOOTCONTAINER_IMAGE_FILE} ${FLASHING_SYSTEM_IMAGE_FILE} ${FLASHING_SYSTEM_IMAGE_FILE}.bmap && popd' EXIT TERM INT
 
-echo "Starting flashing environment..."
-snagrecover -s imx865 -f ${RECOVERY_CONFIG}
+echo "Entering recovery mode..."
+./run-recovery.sh
 
 echo "Waiting for device to appear in fastboot mode..."
-while ! lsusb | grep -q "ID ${TORADEX_FASTBOOT_DEV_ID}"; do
+while ! lsusb | grep -q "ID ${RECOVERY_FASTBOOT_DEV_ID}"; do
     sleep 1
 done
 
@@ -48,6 +48,6 @@ if [[ -f "${SYSTEM_IMAGE_PATH}.bmap" ]]; then
 fi
 
 echo "Flashing..."
-snagflash -P fastboot-uboot -p ${TORADEX_FASTBOOT_DEV_ID} -I ${FLASHING_SCRIPT}
+snagflash -P fastboot-uboot -p ${RECOVERY_FASTBOOT_DEV_ID} -I ${FLASHING_SCRIPT}
 
 echo "Done. Perform manual power cycle to boot into the new system."

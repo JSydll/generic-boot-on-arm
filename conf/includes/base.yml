@@ -78,10 +78,19 @@ local_conf_header:
     SOFTWARE_VERSION ??= "0.0"
 
   common-security: |
-    # For now, keys are created in the build directory - a productive setup would require
+    # For now, keys are created in a top level directory - a productive setup would require
     # proper key provisioning and infrastructure.
-    SBSIGN_KEYS_DIR = "${TOPDIR}/secrets"
+    PKI_BASEPATH = "/repo/pki"
 
+    # Secrets for OS image signing
+    SBSIGN_KEYS_DIR   = "${PKI_BASEPATH}/os-images"
+    
+    # Secrets for update package signing
+    RAUC_KEYRING_FILE = "${PKI_BASEPATH}/update-bundles/updates.ca.cert.pem"
+    RAUC_KEY_FILE     = "${PKI_BASEPATH}/update-bundles/updates.key.pem"
+    RAUC_CERT_FILE    = "${PKI_BASEPATH}/update-bundles/updates.cert.pem"
+    
+    # Integrity checking
     DM_VERITY_IMAGE = "secure-image-minimal"
     DM_VERITY_IMAGE_TYPE = "squashfs"
     IMAGE_CLASSES += "dm-verity-img"

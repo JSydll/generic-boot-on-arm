@@ -3,37 +3,41 @@
 This repository contains a spike for generalizing some of the concepts known from the server and 
 desktop world to embedded devices.
 
-It stands on the shoulders of giants - namely arm, Linaro and Siemens - already pushing this approach
-since a few years. Yet, it tries to further simplify the overall setup and only include the basic
-verified boot and A/B update scheme here.
-
-Currently, only an integration for `qemuarm64` is available. A port on a representative hardware board may follow.
+It stands on the shoulders of giants - namely arm, Linaro and Siemens - who've been pushing this
+approach since a few years. However, it tries to simplify the overall setup and only include the 
+basic verified boot and A/B update scheme here.
 
 ## Wait, but why?
 
-- cross-validation from widespread use in the server & desktop world
-- rather sophisticated specification
-- reduce development & maintenance effort
-- cover some gaps, like missing (default) signature for FIT config itself (see [u-boot docs](https://docs.u-boot.org/en/latest/usage/fit/signature.html#signed-configurations))
+- A sophisticated (and widespread) specification (UEFI Secure Boot) - which also enforces properties
+  like authenticated variables in the system.
+- A stable API for the interaction of drivers and applications with the firmware - which can help to
+  completely decouple BSP & OS layers
+- Less complexity in bootscripting due to the features of `efibootmgr`
+- Reasonable defaults, like signatures for the full kernel + dtb configuration 
+  (see [u-boot docs](https://docs.u-boot.org/en/latest/usage/fit/signature.html#signed-configurations))
+- Distro boot on embedded?
+- Fun?
 
-Also pushed by:
+Relevant, partially embedded focused specificatons:
 - Embedded Base Boot Requirements [EBBR](https://arm-software.github.io/ebbr/)
 - Linaro & ARM partnership on SystemReady
 
-## Approaches
+## Overview of approaches
 
 - **Linaro**'s [Trusted Substrate](https://trusted-substrate.readthedocs.io/en/latest/intro/software_components.html) 
   -> TF-A, OP-TEE, u-boot [EFI provider] + systemd-boot [EFI payload, switching BL] + UKI on ESP (vfat) (+ update unclear)
 - **Siemens** 
   -> TF-A, OP-TEE, u-boot [EFI provider] + efibootguard [EFI payload, switching BL] + UKI on ESP (vfat) + swupdate
 
-> **meta-generic-boot**: TF-A, OP-TEE, u-boot [EFI provider, switching BL] + UKIs w/ profiles (no ESP, squashfs or raw partitions possible) 
+> **meta-generic-boot**:
+  - TF-A, OP-TEE w/ StandaloneMM & RPMB, u-boot [EFI provider, switching BL] + UKIs w/ profiles 
 
 **Improvement goals**:
-- less components to reduce complexity
+- removal of additional switching bootloader to reduce complexity
 - full artifact signing
-- support for partitioning and no dependency on ESP
-- robust filesystems support
+- support for arbitrary partitioning and no need for ESP
+- robust filesystems support (no vfat)
 - sophisticated boot counting possible (in comparision to `systemd-boot`'s file-rename-based approach)
 
 **Readings**:
@@ -51,22 +55,24 @@ Also pushed by:
 
 **Splitting OS and bootloader updates**
 
-Established approaches on embedded Linux devices often use a common path for both updating the Linux side 
-of the system as well as the bootloader (see RAUC's capabilities on doing that, for example).
-In contrast to this, the TF-A architecture and UEFI specification separate the two by defining
-[capsule updates](https://docs.u-boot.org/en/latest/develop/uefi/uefi.html#enabling-uefi-capsule-update-feature)
-for updating the firmware (at least the extended firmware scope or _FIP_ [Firmware Interface Package]).
-This would then also include the bootloader.
-An advantage of this is, again, that implementations must follow a clear specification, while some aspects like
-the requirement for a FAT-based EFI System Partition are potential downsides - especially in the embedded context.
+While there's the concept of [capsule updates](https://docs.u-boot.org/en/latest/develop/uefi/uefi.html#enabling-uefi-capsule-update-feature)
+for updating the firmware (i.e. the bootloader parts), there might be easier and more canonical solutions
+available on boards that come with an eMMC with two separate boot partitions and a MBR switch.
+
+The Verdin iMX8MP SoC falls into this category, hence the simple firmware update via RAUC can be implemented.
 
 **Alternatives to using u-boot as switching bootloader**
 
 _Reasoning according to Siemens:_
 
 - Low trust in its (UEFI-related) implementation
+  _-> It's indeed rather new, but getting more mature already._
+
 - Missing support for (secure) storage of the switching flag (i.e. `BootOrder` and `BootNext`)
+  _-> This is addressed when using RPMB-backed authenticated UEFI variables._
+
 - Early exit from watchdog
+  _-> To be clarified._
 
 Also see [this talk](https://youtu.be/vfYSP4qIJP0?si=RXGUvnzYJCqHUaQZ).
 
@@ -77,52 +83,47 @@ Also see [this talk](https://youtu.be/vfYSP4qIJP0?si=RXGUvnzYJCqHUaQZ).
 - UKIs with multiple profiles ([ukify docs](https://www.freedesktop.org/software/systemd/man/latest/ukify.html#Examples))
 - `u-boot` as EFI provider ([docs](https://docs.u-boot.org/en/latest/develop/uefi/uefi.html))
 - `RAUC` [integration docs](https://rauc.readthedocs.io/en/latest/integration.html#efi)
-- QEMU ARM virt machine ([doc](https://www.qemu.org/docs/master/system/arm/virt.html))
+
+- For early development experiments: QEMU ARM virt machine ([doc](https://www.qemu.org/docs/master/system/arm/virt.html))
 
 ## Challenges and limitations
 
-### Secret handling
+### Secret handling and authenticated runtime variables
 
-Common approaches: efuses, OP-TEE w/ RPMB eMMC (yet, this is still accessible from userspace), burned into binary
+While there is a solution ready to be used with the `StandaloneMM` varstore supplicant and by using RPMB backed storage,
+this is not applicable to all boards and requires **significantly more effort** for a proper **integration** and **provisioning**.
 
-Issues:
-- No guaranteed protection against access from kernel / userspace
-- In QEMU: missing emulation support
-
-> **meta-generic-boot**: Limited due to secrets built-in to u-boot binary, requiring firmware update for key rotation.
+For boards without RPMB, the solution implemented on the `virt-aarch64` branch, storing UEFI variables on the ESP and manually syncing them,
+might be an alternative as long as the thread model allows for it.
 
 **Readings**:
 - Blog by Linaro: [Protected UEFI variables with u-boot](https://www.linaro.org/blog/protected-uefi-variables-with-u-boot/)
+  (or directly from the Ilias [here](https://apalos.github.io/Protected%20UEFI%20variables%20with%20U-Boot.html)).
 - [Patchset for QEMU](https://patchwork.ozlabs.org/project/qemu-devel/list/?series=470527) by Jan Kriska for RPMB support
-
-### Runtime, authenticated variables
-
-Current status: no SetVariableRT in u-boot (barebox maybe?)
-
-**Readings**:
 - Overview by Ilias at Linux Plumbers 2023 ([Session](https://lpc.events/event/17/contributions/1653/), [PDF](https://lpc.events/event/17/contributions/1653/attachments/1338/2682/Plumbers%20-%20EFI%20setvariable%20problems%20and%20solutions.pdf))
 
-> **meta-generic-boot**: Limited by a workaround loading variables from an ESP in separate disk and manually persisting it by copying over changes only written in RAM (also comes with a different u-boot config). Also no further means to protect against rollback are implemented yet.
 
 ### Gapless watchdog configuration
 
-Current status: Potential gap between ExitBootServices & Kernel watchdog activation
+Current status: There are potential gap between ExitBootServices and kernel watchdog activation.
+U-Boot has support for serving the hardware watchdog until ExitBootServices() (according to the UEFI specification).
+There are ongoing discussions about the u-boot implementation in the [trusted-firmware.org mailinglist](https://lists.trustedfirmware.org/archives/list/tf-a@lists.trustedfirmware.org/thread/MLS2QZ7LLTEMOUIU5OUF4YMQ67UHAADV/).
 
-U-Boot has support for serving the hardware watchdog until ExitBootServices() (according to the UEFI spec).
-
-**Readings**:
-- Discussions about the u-boot implementation in the [trusted-firmware.org mailinglist](https://lists.trustedfirmware.org/archives/list/tf-a@lists.trustedfirmware.org/thread/MLS2QZ7LLTEMOUIU5OUF4YMQ67UHAADV/)
 
 ## Current state of implementation
 
-**qemuarm64**:
-...
+**virt-aarch64**:
+
+Only the parts beyond u-boot, i.e. without having a root of trust, are implemented. Also, QEMU lacks support of RPMB emulation,
+so no way to actually make use of TF-A and OP-TEE.
 
 **verdin-imx8mp**:
-...
+
+Working chain of trust, based on mainline branches and several Toradex provided meta layers.
 
 Note: Given that some upstream features (like the `uki.bbclass`) were only recently published,
-none of the current LTS releases can be used.
+none of the current LTS releases can be used. See [Toradex Release Matrix](https://developer.toradex.com/software/toradex-embedded-software/embedded-linux-release-matrix/#current-releases)
+for the versions of core system components like u-boot and kernel.
 
 Why not using the Toradex distro and reference images? This spike is reduced to the bare minimum to get a clear
 understanding of the involved parts while avoiding too much noise coming in from other features.
@@ -130,24 +131,21 @@ This being said, the Toradex layers as well as the Torizon platform come with a 
 reasonably made decisions for productive use cases. You should definitely consider using this instead of rolling
 your own solutions just for the sake of it.
 
-To be clarified:
-
-For QEMU support of the `imx8mp-evk` board model, version 10 is required and needs to be built from sources.
-
 ## Loose ends
 
 - Fine-tune watchdog configuration to avoid a gap?
 - Build testenv Docker image including changes in `QemuDriver`
 - Automatically provide secrets for update bundle signing
-- Upstream patches in `meta-arm` and `labgrid`
+- Upstream / remove patches in community layers and tools.
 - Upstream extensions for `uki.bbclass`
 - Take over patchset on QEMU for RPMB eMMC emulation and remove workaround
-- Implement **capsule updates** for bootloader updates
+- Implement bootloader updates
 
 ## General observations
 
 - Many of the involved open source projects lack beginner documentation
-- Implementations by Linaro and Siemens have a lot more features than the presented approach (which makes it hard to understand at times)
+- Implementations by Toradex, Linaro and Siemens have a lot more features than the presented approach 
+  (which makes them harder to understand at times)
 - Lots of building blocks already in upstream layers - though quality & maintenance needs to be monitored
 
 ## Recent advances in alternative approaches
