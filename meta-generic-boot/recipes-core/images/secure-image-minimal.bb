@@ -8,18 +8,13 @@ LICENSE = "MIT"
 
 inherit core-image uki-with-profiles sbsign
 
-# Required machine specific configuration
-IMAGE_BOARD_SPECIFIC_INC = ""
-IMAGE_BOARD_SPECIFIC_INC:virt-aarch64 = "secure-image-minimal_virt-aarch64.inc"
-IMAGE_BOARD_SPECIFIC_INC:verdin-imx8mp = "secure-image-minimal_verdin-imx8mp.inc"
-
 # Inject an indicator of change into the image
 inherit image-buildinfo
 
 IMAGE_BUILDINFO_VARS:append = " SOFTWARE_VERSION"
 
 # Testing support
-DEPENDS:append = " labgrid-env-config"
+DEPENDS:append = " labgrid-env-config qemu-system-native "
 
 # Image features
 # Note that the rootfs is read-only, so all mountpoints must be created during build time.
@@ -40,9 +35,11 @@ IMAGE_INSTALL = " \
     rauc \
     e2fsprogs-mke2fs \
     efibootmgr \
+    efivar \
+    u-boot-efivars-sync \
 "
 
-IMAGE_FSTYPES = "squashfs wic"
+IMAGE_FSTYPES = "squashfs wic wic.qcow2"
 WKS_FILE = "secure-system-image.wks.in"
 
 # dm-verity setup
@@ -66,8 +63,22 @@ UKI_PROFILE_boot_b[options] = "--cmdline='${CMDLINE_BASE} root=PARTUUID=99979fdc
 
 IMAGE_BOOT_FILES = "${UKI_FILENAME}"
 
-# Allow overwriting configuration from above
-require ${IMAGE_BOARD_SPECIFIC_INC}
+# Kernel and UKI packaging
+#
+KERNEL_DEVICETREE = "devicetree/virt-aarch64.dtb"
+do_uki[depends] += " devicetree-virt-aarch64:do_deploy"
+
+# For emulation, the virtual image size has to exactly fit the specified eMMC size
+do_resize_qcow2_image() {
+    if [ -f "${IMGDEPLOYDIR}/${IMAGE_NAME}.wic.qcow2" ] && [ -n "${QB_MMC_SIZE}" ]; then
+        qemu-img resize "${IMGDEPLOYDIR}/${IMAGE_NAME}.wic.qcow2" "${QB_MMC_SIZE}"
+    fi
+}
+addtask resize_qcow2_image after do_image_wic before do_image_complete
+
+do_image_wic[depends] += " u-boot:do_deploy"
+do_image_complete[depends] += " trusted-firmware-a:do_deploy"
+do_clean[depends] += " trusted-firmware-a:do_clean"
 
 # Allow reuse of the partition images already created by wic
 do_copy_wic_partitions() {

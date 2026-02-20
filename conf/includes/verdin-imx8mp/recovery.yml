@@ -1,9 +1,0 @@
-header:
-  version: 14
-
-target:
-  - u-boot-toradex
-
-local_conf_header:
-  recovery: |
-    UBOOT_RECOVERY_CFG = "1"

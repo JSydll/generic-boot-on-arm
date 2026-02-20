@@ -31,12 +31,7 @@ do_deploy() {
 
     bbdebug 2 "Providing labgrid environment configuration for tests..."
     install -m 0644 ${S}/lg-env-config.yml ${DEPLOYDIR}/${LG_CONFIG_FILE}
-    cd ${DEPLOYDIR}
-    rm -f lg-env-config-${MACHINE}.yml
-    ln -sf ${LG_CONFIG_FILE} lg-env-config-${MACHINE}.yml
-}
 
-do_deploy:append:virt-aarch64() {
     sed -e "s|@@LG_ARTIFACT_MOUNTPOINT@@|${LG_ARTIFACT_MOUNTPOINT}|" \
         -e "s|@@FIRMWARE_ARTIFACT@@|${FIRMWARE_ARTIFACT}|" \
         -e "s|@@SYSTEM_IMAGE_ARTIFACT@@|${SYSTEM_IMAGE_ARTIFACT}|" \
@@ -46,6 +41,10 @@ do_deploy:append:virt-aarch64() {
         -e "s|@@QB_MEM_VALUE@@|${QB_MEM_VALUE}|" \
         -e "s|@@QB_SMP@@|${QB_SMP}|" \
         -i ${DEPLOYDIR}/${LG_CONFIG_FILE}
+
+    cd ${DEPLOYDIR}
+    rm -f lg-env-config-${MACHINE}.yml
+    ln -sf ${LG_CONFIG_FILE} lg-env-config-${MACHINE}.yml
 }
 
 addtask deploy after do_fetch before do_build

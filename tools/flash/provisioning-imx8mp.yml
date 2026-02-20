@@ -1,8 +1,0 @@
-# snagrecover configuration for imx8mp
-# 
-# Note: Choose imx865 SoC family when running snagrecover.
-paths-relative-to: THIS_FILE
-
-flash-bin:
-  # The boot container for final provisioning must be signed and the HAB secure boot enabled!
-  path: provisioning-flash.bin

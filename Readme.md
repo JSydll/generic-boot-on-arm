@@ -7,6 +7,12 @@ It stands on the shoulders of giants - namely arm, Linaro and Siemens - who've b
 approach since a few years. However, it tries to simplify the overall setup and only include the 
 basic verified boot and A/B update scheme here.
 
+There are two implementations:
+
+- the `verdin-imx8mp` (default) branch provides a build configuration for the Toradex iMX8MP SoC.
+- the `virt-aarch64` branch was used for early experiments and has a partial configuration for emulation on QEMU.
+
+
 ## Wait, but why?
 
 - A sophisticated (and widespread) specification (UEFI Secure Boot) - which also enforces properties
@@ -25,15 +31,16 @@ Relevant, partially embedded focused specificatons:
 
 ## Overview of approaches
 
-- **Linaro**'s [Trusted Substrate](https://trusted-substrate.readthedocs.io/en/latest/intro/software_components.html) 
-  -> TF-A, OP-TEE, u-boot [EFI provider] + systemd-boot [EFI payload, switching BL] + UKI on ESP (vfat) (+ update unclear)
+- **Linaro**'s [Trusted Substrate](https://trusted-substrate.readthedocs.io/en/latest/intro/software_components.html)
+  > `TF-A`, `OP-TEE`, `u-boot` [EFI provider] -> `systemd-boot` [EFI payload, switching BL] -> UKI on ESP (vfat) (+ update unclear)
+
 - **Siemens** 
-  -> TF-A, OP-TEE, u-boot [EFI provider] + efibootguard [EFI payload, switching BL] + UKI on ESP (vfat) + swupdate
+  > `TF-A`, `OP-TEE`, `u-boot` [EFI provider] -> `efibootguard` [EFI payload, switching BL] + UKI on ESP (vfat) + `swupdate`
 
-> **meta-generic-boot**:
-  - TF-A, OP-TEE w/ StandaloneMM & RPMB, u-boot [EFI provider, switching BL] + UKIs w/ profiles 
+- **meta-generic-boot**:
+  > `TF-A`, `OP-TEE` w/ `StandaloneMM` & RPMB, `u-boot` [EFI provider, switching BL] + UKIs w/ profiles 
 
-**Improvement goals**:
+**Improvement goals followed in meta-generic-boot**:
 - removal of additional switching bootloader to reduce complexity
 - full artifact signing
 - support for arbitrary partitioning and no need for ESP
@@ -45,6 +52,16 @@ Relevant, partially embedded focused specificatons:
 - isar CIP Core implementation [GitHub](https://gitlab.com/cip-project/cip-core/isar-cip-core/-/blob/master/doc/README.secureboot.md?ref_type=heads)
 - Linaro blog: [UEFI secure boot in u-boot](https://www.linaro.org/blog/uefi-secureboot-in-u-boot/)
 - Introduction to Linaro's [TrustedSubstrate](https://www.youtube.com/watch?v=8fELcFgPY_g) (2025)
+
+### Core technologies
+
+- Trusted Firmware for Cortex-A ([docs for QEMU](https://github.com/ARM-software/arm-trusted-firmware/blob/master/docs/plat/qemu.rst), [blog](https://lnxblog.github.io/2020/08/20/qemu-arm-tf.html))
+- [`meta-arm`](https://git.yoctoproject.org/meta-arm) for `TF-A`, `EDK2`, ...
+- UKIs with multiple profiles ([ukify docs](https://www.freedesktop.org/software/systemd/man/latest/ukify.html#Examples))
+- `u-boot` as EFI provider ([docs](https://docs.u-boot.org/en/latest/develop/uefi/uefi.html))
+- `RAUC` [integration docs](https://rauc.readthedocs.io/en/latest/integration.html#efi)
+
+- For early development experiments: QEMU ARM virt machine ([doc](https://www.qemu.org/docs/master/system/arm/virt.html))
 
 ### Considerations
 
@@ -76,24 +93,12 @@ _Reasoning according to Siemens:_
 
 Also see [this talk](https://youtu.be/vfYSP4qIJP0?si=RXGUvnzYJCqHUaQZ).
 
-### Core technologies
-
-- Trusted Firmware for Cortex-A ([docs for QEMU](https://github.com/ARM-software/arm-trusted-firmware/blob/master/docs/plat/qemu.rst), [blog](https://lnxblog.github.io/2020/08/20/qemu-arm-tf.html))
-- [`meta-arm`](https://git.yoctoproject.org/meta-arm) for `TF-A`, `EDK2`, ...
-- UKIs with multiple profiles ([ukify docs](https://www.freedesktop.org/software/systemd/man/latest/ukify.html#Examples))
-- `u-boot` as EFI provider ([docs](https://docs.u-boot.org/en/latest/develop/uefi/uefi.html))
-- `RAUC` [integration docs](https://rauc.readthedocs.io/en/latest/integration.html#efi)
-
-- For early development experiments: QEMU ARM virt machine ([doc](https://www.qemu.org/docs/master/system/arm/virt.html))
 
 ## Challenges and limitations
 
 ### Secret handling and authenticated runtime variables
 
-While there is a solution ready to be used with the `StandaloneMM` varstore supplicant and by using RPMB backed storage,
-this is not applicable to all boards and requires **significantly more effort** for a proper **integration** and **provisioning**.
-
-For boards without RPMB, the solution implemented on the `virt-aarch64` branch, storing UEFI variables on the ESP and manually syncing them,
+As there is no official support for RPMB emulation on QEMU so far, this branch implements storing UEFI variables on the ESP and manually syncs them,
 might be an alternative as long as the thread model allows for it.
 
 **Readings**:
@@ -112,34 +117,17 @@ There are ongoing discussions about the u-boot implementation in the [trusted-fi
 
 ## Current state of implementation
 
-**virt-aarch64**:
-
 Only the parts beyond u-boot, i.e. without having a root of trust, are implemented. Also, QEMU lacks support of RPMB emulation,
 so no way to actually make use of TF-A and OP-TEE.
 
-**verdin-imx8mp**:
-
-Working chain of trust, based on mainline branches and several Toradex provided meta layers.
-
-Note: Given that some upstream features (like the `uki.bbclass`) were only recently published,
-none of the current LTS releases can be used. See [Toradex Release Matrix](https://developer.toradex.com/software/toradex-embedded-software/embedded-linux-release-matrix/#current-releases)
-for the versions of core system components like u-boot and kernel.
-
-Why not using the Toradex distro and reference images? This spike is reduced to the bare minimum to get a clear
-understanding of the involved parts while avoiding too much noise coming in from other features.
-This being said, the Toradex layers as well as the Torizon platform come with a lot more features and a set of
-reasonably made decisions for productive use cases. You should definitely consider using this instead of rolling
-your own solutions just for the sake of it.
-
 ## Loose ends
 
+- Implement bootloader updates
+- Take over patchset on QEMU for RPMB eMMC emulation and remove workaround
 - Fine-tune watchdog configuration to avoid a gap?
 - Build testenv Docker image including changes in `QemuDriver`
-- Automatically provide secrets for update bundle signing
 - Upstream / remove patches in community layers and tools.
 - Upstream extensions for `uki.bbclass`
-- Take over patchset on QEMU for RPMB eMMC emulation and remove workaround
-- Implement bootloader updates
 
 ## General observations
 

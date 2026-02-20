@@ -1,8 +1,0 @@
-# snagrecover configuration for imx8mp
-# 
-# Note: Choose imx865 SoC family when running snagrecover.
-paths-relative-to: THIS_FILE
-
-flash-bin:
-  # Depending on the use case, the boot container may be signed or still unsigned.
-  path: recovery-flash.bin

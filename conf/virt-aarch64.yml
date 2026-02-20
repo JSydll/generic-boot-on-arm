@@ -8,8 +8,5 @@ header:
 machine: virt-aarch64
 
 local_conf_header:
-  device-config: |
-    EMMC_BLOCK_DEV = "/dev/mmcblk0"
-
   versioning: |
     SOFTWARE_VERSION = "1.0"
