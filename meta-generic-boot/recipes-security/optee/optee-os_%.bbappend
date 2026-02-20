@@ -1,9 +1,15 @@
-SRC_URI:remove:virt-aarch64 = " \
-    file://0001-optee-enable-clang-support.patch \
-    file://0002-Add-optee-ta-instanceKeepCrashed.patch \
+# Extend the basic OP-TEE configuration provided by meta-toradex-security,
+# which is enabled by TDX_OPTEE_ENABLE.
+# To avoid accidentally fusing the auth key during development / on an open device,
+# we use a custom variable to control this part of the behavior.
+EXTRA_OEMAKE += "\
+    CFG_STMM_PATH=../../build/${OPTEE_VARSTORE_SUPPLICANT_BIN} \
+    ${@ bb.utils.contains('OPTEE_RPMB_WRITE_KEY', '1', 'CFG_RPMB_WRITE_KEY=y CFG_RPMB_RESET_FAT=y', '', d)} \
 "
 
-OPTEE_BOARD_SPECIFIC_INC = ""
-OPTEE_BOARD_SPECIFIC_INC:verdin-imx8mp = "optee_verdin-imx8mp.inc"
+# Make the varstore supplicant available for including it in the build
+do_compile:prepend() {
+    cp ${DEPLOY_DIR_IMAGE}/${OPTEE_VARSTORE_SUPPLICANT_BIN} ${B}
+}
 
-require ${OPTEE_BOARD_SPECIFIC_INC}
+do_compile[depends] += "${OPTEE_VARSTORE_SUPPLICANT}:do_deploy"

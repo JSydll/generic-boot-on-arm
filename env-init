@@ -8,12 +8,10 @@ readonly KAS_CMD="${SCRIPT_DIR}/tools/build/kas-container.5.1"
 export KAS_WORK_DIR="${SCRIPT_DIR}/work"
 readonly KAS_CONF_BASE="${SCRIPT_DIR}/conf"
 
-readonly VIRT_MACHINE="virt-aarch64"
-readonly HW_MACHINE="verdin-imx8mp"
+readonly MACHINE="verdin-imx8mp"
 
 # Defaults
 # ----
-TARGET_MACHINE="${TARGET_MACHINE:-${HW_MACHINE}}"
 BUILD_TYPE="debug"
 TEST_DOCKER_IMAGE="emulated-linux-testing"
 # By default, expect signed images to be built.
@@ -29,10 +27,6 @@ function testenv_setup() {
     fi
 }
 
-function set_machine() {
-    export TARGET_MACHINE="$1" 
-}
-
 function set_build_conf() {
     export BUILD_CONF="$1"
 }
@@ -41,13 +35,12 @@ function get_build_conf() {
     if [[ -n "${BUILD_CONF}" ]]; then
         echo "${BUILD_CONF}"
     else
-        echo "${KAS_CONF_BASE}/includes/${BUILD_TYPE}.yml:${KAS_CONF_BASE}/${TARGET_MACHINE}.yml"
+        echo "${KAS_CONF_BASE}/includes/${BUILD_TYPE}.yml:${KAS_CONF_BASE}/${MACHINE}.yml"
     fi    
 }
 
 alias enable-signed='export RECOVERY_FASTBOOT_DEV_ID="1b67:4040"'
 alias enable-unsigned='export RECOVERY_FASTBOOT_DEV_ID="1b67:4000"'
-alias set-machine='set_machine'
 alias set-build-conf='set_build_conf'
 alias buildenv-setup='${KAS_CMD} checkout $(get_build_conf)'
 alias testenv-rebuild='testenv_setup -f'
@@ -58,14 +51,8 @@ alias testenv-rebuild='testenv_setup -f'
 alias build-dump='${KAS_CMD} dump $(get_build_conf)'
 alias build-shell='${KAS_CMD} shell $(get_build_conf)'
 alias build-current='${KAS_CMD} build $(get_build_conf)'
-alias build-runqemu='${KAS_CMD} shell $(get_build_conf) -c "runqemu secure-image-minimal wic.qcow2 serial nographic slirp qemuparams=\" -snapshot\""'
 
 function build_configuration() {
-    if [[ "${TARGET_MACHINE}" != "${HW_MACHINE}" ]]; then
-        echo "Error: build_configuration can only be used with TARGET_MACHINE=${HW_MACHINE}" >&2
-        return 1
-    fi
-
     local -r base_conf="${KAS_CONF_BASE}/includes/base.yml:${KAS_CONF_BASE}/verdin-imx8mp.yml"
     local -r config="$1"
 
@@ -91,13 +78,11 @@ alias build-config='build_configuration'
 function publish_test_artifacts() {
     mkdir -p "${TEST_ARTIFACTS_DIR}"
 
-    for machine in ${VIRT_MACHINE} ${HW_MACHINE}; do
-        local src_path="${SCRIPT_DIR}/work/build/tmp/deploy/images/${machine}"
-        cp "${src_path}/flash.bin" "${TEST_ARTIFACTS_DIR}/flash.bin" &>/dev/null || true
-        cp "${src_path}/secure-image-minimal-${VIRT_MACHINE}.rootfs.wic.qcow2" "${TEST_ARTIFACTS_DIR}/system-image.wic.qcow2" &>/dev/null || true
-        cp "${src_path}/secure-update-bundle-${machine}.raucb" "${TEST_ARTIFACTS_DIR}/secure-update-bundle-${machine}.raucb" &>/dev/null || true
-        cp "${src_path}/lg-env-config-${machine}.yml" "${TEST_ARTIFACTS_DIR}/lg-env-config-${machine}.yml" &>/dev/null || true         
-    done
+    local src_path="${SCRIPT_DIR}/work/build/tmp/deploy/images/${MACHINE}"
+    cp "${src_path}/flash.bin" "${TEST_ARTIFACTS_DIR}/flash.bin" &>/dev/null || true
+    cp "${src_path}/secure-image-minimal-${MACHINE}.rootfs.wic" "${TEST_ARTIFACTS_DIR}/system-image.wic" &>/dev/null || true
+    cp "${src_path}/secure-update-bundle-${MACHINE}.raucb" "${TEST_ARTIFACTS_DIR}/secure-update-bundle-${MACHINE}.raucb" &>/dev/null || true
+    cp "${src_path}/lg-env-config-${MACHINE}.yml" "${TEST_ARTIFACTS_DIR}/lg-env-config-${MACHINE}.yml" &>/dev/null || true         
 }
 
 alias build-publish='publish_test_artifacts'
@@ -116,7 +101,7 @@ function run_in_testenv() {
     fi
     # For some unknown reason, pytest is not able to locate the pytest.ini
     # without explicitly specifying it in non-interactive runs.
-    PYTEST_OPTIONS="-c /test/pytest.ini --lg-env /artifacts/lg-env-config-${TARGET_MACHINE}.yml"
+    PYTEST_OPTIONS="-c /test/pytest.ini --lg-env /artifacts/lg-env-config-${MACHINE}.yml"
     # Spawn an ephemeral test container and pass command parameters to it
     docker run --rm -t \
         -v "${SCRIPT_DIR}/test"/:/test/ \
@@ -133,13 +118,8 @@ alias test-run-pytest='run_in_testenv /usr/local/bin/pytest'
 # Flash
 # ----
 function flash_device() {
-    if [[ "${TARGET_MACHINE}" != "${HW_MACHINE}" ]]; then
-        echo "Error: flash_device can only be used with TARGET_MACHINE=${HW_MACHINE}" >&2
-        return 1
-    fi
-
-    local artifact_path="${SCRIPT_DIR}/work/build/tmp/deploy/images/${HW_MACHINE}"
-    "${SCRIPT_DIR}/tools/flash/flash.sh" "${artifact_path}" "flash.bin" "secure-image-minimal-${HW_MACHINE}.rootfs.wic"
+    local artifact_path="${SCRIPT_DIR}/work/build/tmp/deploy/images/${MACHINE}"
+    "${SCRIPT_DIR}/tools/flash/flash.sh" "${artifact_path}" "flash.bin" "secure-image-minimal-${MACHINE}.rootfs.wic"
 }
 alias flash-device='flash_device'
 # ----
@@ -149,22 +129,9 @@ alias flash-device='flash_device'
 function run_marked_tests() {
     local -r marker_expression="$1"
     shift
-
-    #local skip_hardware="n"
-    #if [[ "$1" == "no-hardware" ]]; then
-    #    skip_hardware="y"
-    #    shift
-    #fi
-
-    echo "=== Running ${marker_expression} on emulation ==="
-    set-machine "${VIRT_MACHINE}"
-    test-run-pytest -n auto -m "(${marker_expression}) and not hardware_only" $@
-
-    #if [[ "${skip_hardware}" == "n" ]]; then
-    #    echo "=== Running ${marker_expression} on hardware ===" 
-    #    set-machine "${HW_MACHINE}"
-    #    test-run-pytest -m "(${marker_expression}) and not emulation_only" $@
-    #fi
+    
+    echo "=== Running ${marker_expression} on hardware ===" 
+    test-run-pytest -m "(${marker_expression}) and not emulation_only" $@
 }
 
 alias run-pre-merge-tests='run_marked_tests "smoketest"'

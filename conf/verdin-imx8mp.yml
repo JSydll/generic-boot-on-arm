@@ -47,9 +47,6 @@ repos:
     branch: scarthgap-7.x.y-next
 
 local_conf_header:
-  device-config: |
-    EMMC_BLOCK_DEV = "/dev/mmcblk2"
-
   imx-bsp: |
     ACCEPT_FSL_EULA = "1"
 

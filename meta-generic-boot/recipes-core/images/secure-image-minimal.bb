@@ -8,11 +8,6 @@ LICENSE = "MIT"
 
 inherit core-image uki-with-profiles sbsign
 
-# Required machine specific configuration
-IMAGE_BOARD_SPECIFIC_INC = ""
-IMAGE_BOARD_SPECIFIC_INC:virt-aarch64 = "secure-image-minimal_virt-aarch64.inc"
-IMAGE_BOARD_SPECIFIC_INC:verdin-imx8mp = "secure-image-minimal_verdin-imx8mp.inc"
-
 # Inject an indicator of change into the image
 inherit image-buildinfo
 
@@ -26,7 +21,7 @@ DEPENDS:append = " labgrid-env-config"
 OVERLAYFS_ETC_CREATE_MOUNT_DIRS = "0"
 OVERLAYFS_ETC_MOUNT_POINT = "/data"
 OVERLAYFS_ETC_FSTYPE = "ext4"
-OVERLAYFS_ETC_DEVICE = "${EMMC_BLOCK_DEV}p6"
+OVERLAYFS_ETC_DEVICE = "/dev/mmcblk2p5"
 
 IMAGE_FEATURES:append = " \
     read-only-rootfs \
@@ -40,9 +35,12 @@ IMAGE_INSTALL = " \
     rauc \
     e2fsprogs-mke2fs \
     efibootmgr \
+    optee-os \
+    optee-client \
+    efivar \
 "
 
-IMAGE_FSTYPES = "squashfs wic"
+IMAGE_FSTYPES = "squashfs wic wic.bmap"
 WKS_FILE = "secure-system-image.wks.in"
 
 # dm-verity setup
@@ -66,13 +64,20 @@ UKI_PROFILE_boot_b[options] = "--cmdline='${CMDLINE_BASE} root=PARTUUID=99979fdc
 
 IMAGE_BOOT_FILES = "${UKI_FILENAME}"
 
-# Allow overwriting configuration from above
-require ${IMAGE_BOARD_SPECIFIC_INC}
+# Account for the DTBs being deployed in DEPLOYDIR without subdirectories
+KERNEL_DTB_PREFIX = ""
+do_uki[depends] += "linux-toradex-upstream:do_deploy"
+
+# While the boot container is not a part of the wic image (given it resides
+# in the eMMC boot partition), it's still required and should be built for 
+# deployment on the device.
+do_image_wic[depends] += " u-boot-toradex:do_deploy"
+do_clean[depends] += " u-boot-toradex:do_clean"
 
 # Allow reuse of the partition images already created by wic
 do_copy_wic_partitions() {
     wic_workdir="${WORKDIR}/build-wic"
-    cp -v "${wic_workdir}"/*.direct.p2 "${IMGDEPLOYDIR}"/${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}${IMAGE_NAME_SUFFIX}.uki.squashfs
-    cp -v "${wic_workdir}"/*.direct.p4 "${IMGDEPLOYDIR}"/${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}${IMAGE_NAME_SUFFIX}.verity.squashfs
+    cp -v "${wic_workdir}"/*.direct.p1 "${IMGDEPLOYDIR}"/${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}${IMAGE_NAME_SUFFIX}.uki.squashfs
+    cp -v "${wic_workdir}"/*.direct.p3 "${IMGDEPLOYDIR}"/${IMAGE_BASENAME}${IMAGE_MACHINE_SUFFIX}${IMAGE_NAME_SUFFIX}.verity.squashfs
 }
 addtask copy_wic_partitions after do_image_wic before do_image_complete

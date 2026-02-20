@@ -36,16 +36,4 @@ do_deploy() {
     ln -sf ${LG_CONFIG_FILE} lg-env-config-${MACHINE}.yml
 }
 
-do_deploy:append:virt-aarch64() {
-    sed -e "s|@@LG_ARTIFACT_MOUNTPOINT@@|${LG_ARTIFACT_MOUNTPOINT}|" \
-        -e "s|@@FIRMWARE_ARTIFACT@@|${FIRMWARE_ARTIFACT}|" \
-        -e "s|@@SYSTEM_IMAGE_ARTIFACT@@|${SYSTEM_IMAGE_ARTIFACT}|" \
-        -e "s|@@UPDATE_BUNDLE_ARTIFACT@@|${UPDATE_BUNDLE_ARTIFACT}|" \
-        -e "s|@@MACHINE@@|${MACHINE}|" \
-        -e "s|@@QB_CPU_VALUE@@|${QB_CPU_VALUE}|" \
-        -e "s|@@QB_MEM_VALUE@@|${QB_MEM_VALUE}|" \
-        -e "s|@@QB_SMP@@|${QB_SMP}|" \
-        -i ${DEPLOYDIR}/${LG_CONFIG_FILE}
-}
-
 addtask deploy after do_fetch before do_build
