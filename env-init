@@ -63,9 +63,9 @@ function build_configuration() {
     fi
 
     if [[ "${config}" == "recovery" ]]; then
-        set_build_conf "${base_conf}:${KAS_CONF_BASE}/includes/verdin-imx8mp/recovery.yml"
+        set_build_conf "${base_conf}:${KAS_CONF_BASE}/includes/recovery.yml"
     elif [[ "${config}" == "provisioning" ]]; then
-        set_build_conf "${base_conf}:${KAS_CONF_BASE}/includes/verdin-imx8mp/recovery.yml:${KAS_CONF_BASE}/includes/verdin-imx8mp/provisioning.yml"
+        set_build_conf "${base_conf}:${KAS_CONF_BASE}/includes/recovery.yml:${KAS_CONF_BASE}/includes/provisioning.yml"
     else
         set_build_conf "${base_conf}"
     fi

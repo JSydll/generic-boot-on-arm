@@ -17,7 +17,7 @@ repos:
     path: layers/bitbake
     branch: "2.12"
     layers:
-      bitbake: excluded
+      bitbake: disabled
 
   openembedded-core:
     url: https://git.openembedded.org/openembedded-core

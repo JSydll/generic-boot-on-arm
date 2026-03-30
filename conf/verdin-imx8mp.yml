@@ -59,6 +59,9 @@ local_conf_header:
     IMAGE_BOOT_FILES:remove = "boot.scr-${MACHINE};boot.scr"
     WKS_FILE_DEPENDS:remove = " u-boot-default-script"
 
+    # Simplify DTB selection
+    KERNEL_DEVICETREE:verdin-imx8mp = "${KERNEL_DTB_PREFIX}imx8mp-verdin-wifi-dahlia.dtb"
+
   verdin-imx8mp-security: |
     MACHINE_FEATURES:append = " optee efi uefi-secureboot"
 
