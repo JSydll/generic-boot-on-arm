@@ -14,7 +14,7 @@ defaults:
 repos:
   bitbake:
     # master branches are on whinlatter so use corresponding bitbake version
-    branch: "2.14"
+    branch: "2.16"
 
   meta-arm-contrib:
     branch: master-next-whinlatter
